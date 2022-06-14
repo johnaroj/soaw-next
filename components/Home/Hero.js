@@ -52,8 +52,8 @@ const Hero = props => {
         modules={[Pagination, Navigation, Autoplay, EffectFade]}
         className={classes.swiper}
       >
-        <SwiperSlide zoom><Image src='/images/photos/home/slide-1.jpg' srcSet='/images/photos/home/slide-1.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
-        <SwiperSlide zoom><Image src='/images/photos/home/slide-2.jpg' srcSet='/images/photos/home/slide-2.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
+        <SwiperSlide zoom><Image alt="slide-1" src='/images/photos/home/slide-1.jpg' srcSet='/images/photos/home/slide-1.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
+        <SwiperSlide zoom><Image alt="slide-2" src='/images/photos/home/slide-2.jpg' srcSet='/images/photos/home/slide-2.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
       </Swiper>}
     </div>
   );

@@ -786,7 +786,7 @@ const HealthForm = (props) => {
                                 id="psychologicalLimitationCenter"
                                 name="psychologicalLimitationCenter"
                                 render={({ field }) => (
-                                    <TextFiel
+                                    <TextField
                                         {...field}
                                         label="Por fabor indiká kua instansia?"
                                         variant="outlined"

@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { useForm, Controller } from "react-hook-form"
 import { makeStyles } from '@mui/styles';
 import { useTheme } from '@mui/material/styles'
-import { useDropzone } from "react-dropzone";
+import { DropzoneArea } from "react-dropzone";
 import imageCompression from 'browser-image-compression';
 import { ConvertImagesToFile } from '@/utils/convertImages';
 import {

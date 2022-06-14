@@ -111,7 +111,7 @@ const General = props => {
 
     useEffect(() => {
         fetchRequest();
-    }, [year])
+    }, [year, fetchRequest])
 
     const classes = useStyles
 
