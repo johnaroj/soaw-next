@@ -1,0 +1,32 @@
+module.exports = {
+    categories: [
+        { Id: 1, Name: 'Proof Of Resident' },
+        { Id: 2, Name: 'Proof Of Partner Income' },
+        { Id: 3, Name: 'Proof Of Marriage' },
+        { Id: 4, Name: 'Proof Of Registered Partner' },
+        { Id: 5, Name: 'Proof Of Divorce' },
+        { Id: 6, Name: 'Proof Of Death certificate' },
+        { Id: 7, Name: 'Proof Of Children' },
+        { Id: 8, Name: 'Proof Of Job Seeking' },
+        { Id: 9, Name: 'Proof Of Can\'t Work' },
+        { Id: 10, Name: 'Current Account Statements' },
+        { Id: 11, Name: 'Savings Account Statements' },
+        { Id: 12, Name: 'Proof Of Medical Specialist Treatment' },
+        { Id: 13, Name: 'Proof Of Psychology Treatment' },
+        { Id: 14, Name: 'Proof Of Psychiatry Treatment' },
+        { Id: 15, Name: 'Proof Of Income Last Employer' },
+        { Id: 16, Name: 'Proof Of Rental Contract' },
+        { Id: 17, Name: 'Proof Of Rental Payment' },
+        { Id: 18, Name: 'Proof Of Psychological Limitation Diagnostic Report' },
+        { Id: 19, Name: 'Proof Of Mental Disorder Diagnostic Report' },
+        { Id: 20, Name: 'Proof Of Contract' },
+        { Id: 21, Name: 'Proof Of Verdict' },
+        { Id: 22, Name: 'Proof Of ID' },
+        { Id: 23, Name: 'Proof Of Lost Job Due Covid' },
+        { Id: 24, Name: 'Proof Of RedCrossCard' },
+        { Id: 25, Name: 'Proof Of Income Last Employer' },
+        { Id: 26, Name: 'Proof Of Rental Contract' },
+        { Id: 27, Name: 'Proof Of Rental Payment' },
+
+    ]
+}
