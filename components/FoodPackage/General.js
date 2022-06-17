@@ -5,7 +5,12 @@ import imageCompression from 'browser-image-compression';
 import { useForm, Controller } from "react-hook-form"
 import { makeStyles } from '@mui/styles';
 import { useTheme } from '@mui/material/styles';
-import { AddressSelect, CountrySelect, StatusSelect } from './General/components'
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers';
+import AddressSelect from '@/components/AddressSelect'
+import CountrySelect from '@/components/CountrySelect'
+import StatusSelect from '@/components/StatusSelect'
 import { DropzoneArea } from 'material-ui-dropzone'
 import {
     useMediaQuery,
@@ -20,15 +25,12 @@ import {
     Checkbox,
     Select,
     MenuItem,
-    CircularProgress
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { useMutation, useQuery } from "react-query";
-import { Alert } from '@mui/material/Alert';
-import { useHistory } from 'react-router-dom';
-import DateDropdown from 'components/DateDropdown';
-import { useSession } from 'next-auth/react';
+import { useMutation } from "react-query";
 
 const useStyles = makeStyles(theme => ({
     root: {},
@@ -62,17 +64,10 @@ const useStyles = makeStyles(theme => ({
 
 
 const General = props => {
-    const { className, ...rest } = props;
-    const history = useHistory()
-    const { data: session, status } = useSession()
-    const { data: exists, isLoading: isExisitsLoading } = useQuery('exists', async () => {
-        const result = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${session.user.id}&type=2`)
-        const data = await result.json()
-        return data;
-    })
+    const { className, request, ...rest } = props;
 
     const [mutateRequest, { isLoading, isSuccess, isError, error }] = useMutation(async (data) => {
-        const result = await fetch(`${process.env.REACT_APP_API}/api/request`, {
+        const result = await fetch(`${NEXT_URL}/api/request`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -543,13 +538,31 @@ const General = props => {
                                 >
                                     9. Fecha di nasementu
                                 </Typography>
-                                <DateDropdown
-                                    name='dateOfBirth'
-                                    startYear={new Date().getFullYear() - 100}
-                                    endYear={new Date().getFullYear()}
-                                    reverse
-                                    register={register}
-                                    setDateValue={handleBirthdayChange} />
+                                <Controller
+                                    id="dateOfBirth"
+                                    name="dateOfBirth"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} lo>
+                                            <DatePicker
+                                                {...field}
+                                                label="Fecha di nasementu"
+                                                disableFuture
+                                                mask="__-__-____"
+                                                inputFormat="dd-MM-yyyy"
+                                                value={field.value}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
+                                                    fullWidth
+                                                    error={errors?.dateOfBirth ? true : false} />}
+                                                onChange={(e) => {
+                                                    console.log(e)
+                                                    field.onChange(e);
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    )}
+                                />
                                 {errors.dateOfBirth && <p style={{ color: '#bf1650' }}>{errors.dateOfBirth.message}</p>}
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -584,47 +597,43 @@ const General = props => {
                                 {errors.identificationNumber && <p style={{ color: '#bf1650' }}>{errors.identificationNumber.message}</p>}
                             </Grid>
                             <Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    11. Sekso
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="gender"
                                     error={errors.gender ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                11. Sekso
-                                            </Typography>
-                                            <RadioGroup aria-label="gender" name="gender" value={value} onChange={onChange} row>
-                                                <FormControlLabel value="female" control={<Radio />} label="Femenino" />
-                                                <FormControlLabel value="male" control={<Radio />} label="Maskulino" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value="female" control={<Radio />} label="Femenino" />
+                                            <FormControlLabel value="male" control={<Radio />} label="Maskulino" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.gender && <p style={{ color: '#bf1650' }}>{errors.gender.message}</p>}
                             </Grid>
                             <Grid item xs={12} sm={6}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    12. Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="identificationType"
                                     error={errors.identificationType ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                12. Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes?
-                                            </Typography>
-                                            <RadioGroup aria-label="identificationType" name="identificationType" value={value} onChange={onChange} row>
-                                                <FormControlLabel value="driversLicense" control={<Radio />} label="Reibeweis" />
-                                                <FormControlLabel value="ID" control={<Radio />} label="Sédula" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value="driversLicense" control={<Radio />} label="Reibeweis" />
+                                            <FormControlLabel value="ID" control={<Radio />} label="Sédula" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.identificationType && <p style={{ color: '#bf1650' }}>{errors.identificationType.message}</p>}
@@ -638,14 +647,31 @@ const General = props => {
                                 >
                                     13. Fecha di vensementu di e {watch('identificationType') === 'driversLicense' ? 'reibeweis' : 'sédula'}
                                 </Typography>
-                                <DateDropdown
-                                    name='expiryDate'
-                                    startYear={new Date().getFullYear() - 10}
-                                    endYear={new Date().getFullYear() + 10}
-                                    reverse
-                                    register={register}
-                                    setDateValue={handleExpiryDate} />
-                                {errors.expiryDate && <p style={{ color: '#bf1650' }}>{errors.expiryDate.message}</p>}
+                                <Controller
+                                    id="expiryDate"
+                                    name="expiryDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} lo>
+                                            <DatePicker
+                                                {...field}
+                                                label={`Fecha di vensementu di e ${watch('identificationType') === 'driversLicense' ? 'reibeweis' : 'sédula'}`}
+                                                disableFuture
+                                                mask="__-__-____"
+                                                inputFormat="dd-MM-yyyy"
+                                                value={field.value}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
+                                                    fullWidth
+                                                    error={errors?.expiryDate ? true : false} />}
+                                                onChange={(e) => {
+                                                    console.log(e)
+                                                    field.onChange(e);
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    )}
+                                />
 
                             </Grid>
                             <Grid item xs={12}>
@@ -690,16 +716,17 @@ const General = props => {
                                     name="phone1"
                                     control={control}
                                     render={
-                                        ({ value, onChange, onBlur }) => (
+                                        ({ field }) => (
                                             <TextField
+                                                {...field}
                                                 label="Number di telefòn di selular"
                                                 variant="outlined"
                                                 type='number'
                                                 required
                                                 fullWidth
-                                                value={value || ''}
-                                                onChange={onChange}
-                                                onBlur={onBlur}
+                                                value={field.value || ''}
+                                                onChange={field.onChange}
+                                                onBlur={field.onBlur}
                                                 error={errors.phone1 ? true : false}
                                             />
                                         )
@@ -720,13 +747,14 @@ const General = props => {
                                     control={control}
                                     id="whatsapp"
                                     name="whatsapp"
-                                    render={({ value, onChange, onBlur }) => (
+                                    render={({ field }) => (
                                         <TextField
+                                            {...field}
                                             label="Number di telefòn di whatsapp"
                                             fullWidth
                                             type='number'
                                             variant="outlined"
-                                            value={value || ''}
+                                            value={field.value || ''}
                                             onChange={e => onChange(handleWhatsappNumber(e))}
                                             onBlur={onBlur}
                                         />
@@ -748,15 +776,16 @@ const General = props => {
                                     name="phone2"
                                     control={control}
                                     render={
-                                        ({ value, onChange, onBlur }) => (
+                                        ({ field }) => (
                                             <TextField
+                                                {...field}
                                                 label="Number di telefòn kas"
                                                 variant="outlined"
                                                 type='number'
                                                 fullWidth
-                                                value={value || ''}
-                                                onChange={onChange}
-                                                onBlur={onBlur}
+                                                value={field.value || ''}
+                                                onChange={field.onChange}
+                                                onBlur={field.onBlur}
                                                 error={errors.phone2 ? true : false}
                                             />
                                         )
@@ -775,16 +804,22 @@ const General = props => {
                                     16. E-mail
                                 </Typography>
                                 <Controller
-                                    as={TextField}
                                     id="email"
                                     name="email"
-                                    label="Email"
-                                    variant="outlined"
-                                    type='email'
-                                    fullWidth
                                     control={control}
-                                    error={errors.email ? true : false}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Email"
+                                            variant="outlined"
+                                            type='email'
+                                            fullWidth
+
+                                            error={errors.email ? true : false}
+                                        />
+                                    )}
                                 />
+
                                 {errors.email && <p style={{ color: '#bf1650' }}>{errors.email.message}</p>}
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -796,15 +831,19 @@ const General = props => {
                                     17. Konfirmá e-mail
                                 </Typography>
                                 <Controller
-                                    as={TextField}
                                     id="confirmEmail"
                                     name="confirmEmail"
-                                    label="Konfirmá Email"
-                                    variant="outlined"
-                                    type='email'
-                                    fullWidth
                                     control={control}
-                                    error={errors.confirmEmail ? true : false}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Konfirmá Email"
+                                            variant="outlined"
+                                            type='email'
+                                            fullWidth
+                                            error={errors.confirmEmail ? true : false}
+                                        />
+                                    )}
                                 />
                                 {errors.confirmEmail && <p style={{ color: '#bf1650' }}>{errors.confirmEmail.message}</p>}
                             </Grid>
@@ -887,24 +926,22 @@ const General = props => {
                             }
                             {watch("maritalStatus")?.value === 'divorced' || watch("maritalStatus")?.value === 'single' ?
                                 (<Grid item xs={12}>
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="textPrimary"
+                                        className={classes.inputTitle}
+                                    >
+                                        Bo ta den un relashon aktualmente?
+                                    </Typography>
                                     <Controller
                                         control={control}
                                         name="hasRelationship"
                                         error={errors.children ? true : false}
-                                        render={({ onChange, value }) => (
-                                            <>
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    color="textPrimary"
-                                                    className={classes.inputTitle}
-                                                >
-                                                    Bo ta den un relashon aktualmente?
-                                                </Typography>
-                                                <RadioGroup aria-label="hasRelationship" name="hasRelationship" value={JSON.parse(value)} onChange={onChange} row>
-                                                    <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                    <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                                </RadioGroup>
-                                            </>
+                                        render={({ field }) => (
+                                            <RadioGroup {...field} row>
+                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                            </RadioGroup>
                                         )}
                                     />
                                     {errors.hasRelationship && <p style={{ color: '#bf1650' }}>{errors.hasRelationship.message}</p>}
@@ -923,17 +960,22 @@ const General = props => {
                                                 Fam di {watch("maritalStatus")?.value === "married" ? "kasá" : watch("maritalStatus")?.value === "widow" ? "kasá ku a fayesé" : "pareha"}
                                             </Typography>
                                             <Controller
-                                                as={TextField}
                                                 id="lastNamePartner"
                                                 name="lastNamePartner"
-                                                label="Fam"
-                                                size="medium"
-                                                required
-                                                variant="outlined"
-                                                fullWidth
                                                 control={control}
-                                                error={errors.lastNamePartner ? true : false}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Fam"
+                                                        size="medium"
+                                                        required
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        error={errors.lastNamePartner ? true : false}
+                                                    />
+                                                )}
                                             />
+
                                             {errors.lastNamePartner && <p style={{ color: '#bf1650' }}>{errors.lastNamePartner.message}</p>}
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
@@ -945,16 +987,19 @@ const General = props => {
                                                 Nòmber di {watch("maritalStatus")?.value === "married" ? "kasá" : watch("maritalStatus")?.value === "widow" ? "kasá ku a fayesé" : "pareha"}
                                             </Typography>
                                             <Controller
-                                                as={TextField}
                                                 id="firstNamePartner"
                                                 name="firstNamePartner"
-                                                label="Nòmber"
-                                                variant="outlined"
-                                                size="medium"
-                                                required
-                                                fullWidth
                                                 control={control}
-                                                error={errors.firstNamePartner ? true : false}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field} label="Nòmber"
+                                                        variant="outlined"
+                                                        size="medium"
+                                                        required
+                                                        fullWidth
+                                                        error={errors.firstNamePartner ? true : false}
+                                                    />
+                                                )}
                                             />
                                             {errors.firstNamePartner && <p style={{ color: '#bf1650' }}>{errors.firstNamePartner.message}</p>}
                                         </Grid>
@@ -999,22 +1044,27 @@ const General = props => {
                                                 </Typography>
                                                 <Controller
                                                     classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                    as={DropzoneArea}
-                                                    dropzoneText={`‘Upload’ prueba di entrada di bo ${watch("maritalStatus")?.value === "married" ? 'kasá' : 'pareha'} (image/* òf .pdf)`}
-                                                    name="proofOfPartnerIncome"
-                                                    label="‘Upload’ prueba di entrada di bo kas"
                                                     control={control}
-                                                    error={errors.proofOfPartnerIncome ? true : false}
-                                                    onDrop={(files) => onDropHandler(files, 2)}
-                                                    onDelete={(file) => onDeleteHandler(file, 2)}
-                                                    filesLimit={1}
-                                                    acceptedFiles={['image/*', '.pdf']}
-                                                    showPreviews={true}
-                                                    showPreviewsInDropzone={false}
-                                                    useChipsForPreview
-                                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                    previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                    previewText="Selected files"
+                                                    name="proofOfPartnerIncome"
+                                                    render={({ field }) => (
+                                                        <DropzoneArea
+                                                            {...field}
+                                                            dropzoneText={`‘Upload’ prueba di entrada di bo ${watch("maritalStatus")?.value === "married" ? 'kasá' : 'pareha'} (image/* òf .pdf)`}
+
+                                                            label="‘Upload’ prueba di entrada di bo kas"
+                                                            control={control}
+                                                            error={errors.proofOfPartnerIncome ? true : false}
+                                                            onDrop={(files) => onDropHandler(files, 2)}
+                                                            onDelete={(file) => onDeleteHandler(file, 2)}
+                                                            filesLimit={1}
+                                                            acceptedFiles={['image/*', '.pdf']}
+                                                            showPreviews={true}
+                                                            showPreviewsInDropzone={false}
+                                                            useChipsForPreview
+                                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                            previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                            previewText="Selected files"
+                                                        />)}
                                                 />
                                                 {errors.proofOfPartnerIncome && <p style={{ color: '#bf1650' }}>{errors.proofOfPartnerIncome.message}</p>}
                                             </Grid>
@@ -1031,22 +1081,26 @@ const General = props => {
                                                 </Typography>
                                                 <Controller
                                                     classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                    as={DropzoneArea}
-                                                    dropzoneText={`‘Upload’ prueba di ${watch("maritalStatus")?.value === 'married' ? 'matrimonio òf buki di matrimonio' : 'konbibensia legalisá di pareha'} (image/* òf .pdf)`}
                                                     name="proofOfMarriage"
-                                                    label="Prueba di matrimonio"
                                                     control={control}
-                                                    error={errors.proofOfMarriage ? true : false}
-                                                    onDrop={(files) => onDropHandler(files, watch("maritalStatus")?.value === 'married' ? 3 : 4)}
-                                                    onDelete={(file) => onDeleteHandler(file, watch("maritalStatus")?.value === 'married' ? 3 : 4)}
-                                                    filesLimit={1}
-                                                    acceptedFiles={['image/*', '.pdf']}
-                                                    showPreviews={true}
-                                                    showPreviewsInDropzone={false}
-                                                    useChipsForPreview
-                                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                    previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                    previewText="Selected files"
+                                                    render={({ field }) => (
+                                                        <DropzoneArea
+                                                            {...field}
+                                                            dropzoneText={`‘Upload’ prueba di ${watch("maritalStatus")?.value === 'married' ? 'matrimonio òf buki di matrimonio' : 'konbibensia legalisá di pareha'} (image/* òf .pdf)`}
+                                                            label="Prueba di matrimonio"
+                                                            error={errors.proofOfMarriage ? true : false}
+                                                            onDrop={(files) => onDropHandler(files, watch("maritalStatus")?.value === 'married' ? 3 : 4)}
+                                                            onDelete={(file) => onDeleteHandler(file, watch("maritalStatus")?.value === 'married' ? 3 : 4)}
+                                                            filesLimit={1}
+                                                            acceptedFiles={['image/*', '.pdf']}
+                                                            showPreviews={true}
+                                                            showPreviewsInDropzone={false}
+                                                            useChipsForPreview
+                                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                            previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                            previewText="Selected files"
+                                                        />
+                                                    )}
                                                 />
                                                 {errors.proofOfMarriage && <p style={{ color: '#bf1650' }}>{errors.proofOfMarriage.message}</p>}
                                             </Grid>
@@ -1062,22 +1116,26 @@ const General = props => {
                                                 </Typography>
                                                 <Controller
                                                     classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                    as={DropzoneArea}
-                                                    dropzoneText="‘Upload’ e prueba di fayesementu di bo kasá(image/* òf .pdf)"
                                                     name="proofOfDeath"
-                                                    label="Prueba di matrimonio"
                                                     control={control}
-                                                    error={errors.proofOfDeath ? true : false}
-                                                    onDrop={(files) => onDropHandler(files, 6)}
-                                                    onDelete={(file) => onDeleteHandler(file, 6)}
-                                                    filesLimit={1}
-                                                    acceptedFiles={['image/*', '.pdf']}
-                                                    showPreviews={true}
-                                                    showPreviewsInDropzone={false}
-                                                    useChipsForPreview
-                                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                    previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                    previewText="Selected files"
+                                                    render={({ field }) => (
+                                                        <DropzoneArea
+                                                            {...field}
+                                                            dropzoneText="‘Upload’ e prueba di fayesementu di bo kasá(image/* òf .pdf)"
+                                                            label="Prueba di matrimonio"
+                                                            error={errors.proofOfDeath ? true : false}
+                                                            onDrop={(files) => onDropHandler(files, 6)}
+                                                            onDelete={(file) => onDeleteHandler(file, 6)}
+                                                            filesLimit={1}
+                                                            acceptedFiles={['image/*', '.pdf']}
+                                                            showPreviews={true}
+                                                            showPreviewsInDropzone={false}
+                                                            useChipsForPreview
+                                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                            previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                            previewText="Selected files"
+                                                        />
+                                                    )}
                                                 />
                                                 {errors.proofOfDeath && <p style={{ color: '#bf1650' }}>{errors.proofOfDeath.message}</p>}
                                             </Grid>
@@ -1088,24 +1146,23 @@ const General = props => {
                             {
                                 watch("maritalStatus")?.value === 'single' &&
                                 (<Grid item xs={12}>
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="textPrimary"
+                                        className={classes.inputTitle}
+                                    >
+                                        Bo ta biba huntu ku bo pareha?
+                                    </Typography>
                                     <Controller
                                         control={control}
                                         name="livingTogether"
                                         error={errors.children ? true : false}
-                                        render={({ onChange, value }) => (
-                                            <>
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    color="textPrimary"
-                                                    className={classes.inputTitle}
-                                                >
-                                                    Bo ta biba huntu ku bo pareha?
-                                                </Typography>
-                                                <RadioGroup aria-label="livingTogether" name="livingTogether" value={JSON.parse(value)} onChange={onChange} row>
-                                                    <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                    <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                                </RadioGroup>
-                                            </>
+                                        render={({ field }) => (
+
+                                            <RadioGroup {...field} row>
+                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                            </RadioGroup>
                                         )}
                                     />
                                     {errors.livingTogether && <p style={{ color: '#bf1650' }}>{errors.livingTogether.message}</p>}
@@ -1140,15 +1197,21 @@ const General = props => {
                                                 Na kua number di adrès boso ta biba?
                                             </Typography>
                                             <Controller
-                                                as={TextField}
                                                 id="livingTogetherAddressNumber"
                                                 name="livingTogetherAddressNumber"
-                                                label="Na kua number di adrès boso ta biba? "
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                                error={errors.livingTogetherAddressNumber ? true : false}
                                                 control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Na kua number di adrès boso ta biba? "
+                                                        variant="outlined"
+                                                        required
+                                                        fullWidth
+                                                        error={errors.livingTogetherAddressNumber ? true : false}
+                                                    />
+                                                )}
+
+
                                             />
                                             {errors.livingTogetherAddressNumber && <p style={{ color: '#bf1650' }}>{errors.livingTogetherAddressNumber.message}</p>}
                                         </Grid>
@@ -1157,24 +1220,22 @@ const General = props => {
                             }
 
                             <Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    19. Bo tin yu?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="hasChildren"
                                     error={errors.children ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                19. Bo tin yu?
-                                            </Typography>
-                                            <RadioGroup aria-label="hasChildren" name="hasChildren" value={JSON.parse(value)} onChange={onChange} row>
-                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.hasChildren && <p style={{ color: '#bf1650' }}>{errors.hasChildren.message}</p>}
@@ -1192,8 +1253,15 @@ const General = props => {
                                             </Typography>
                                             <Controller
                                                 control={control}
-                                                as={
-                                                    <Select>
+
+                                                render={({ field }) => (
+                                                    <Select
+                                                        {...field}
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        name="ownChildren"
+                                                        error={errors.ownChildren ? true : false}
+                                                    >
                                                         <MenuItem value={0}></MenuItem>
                                                         <MenuItem value={1}>1</MenuItem>
                                                         <MenuItem value={2}>2</MenuItem>
@@ -1206,11 +1274,7 @@ const General = props => {
                                                         <MenuItem value={9}>9</MenuItem>
 
                                                     </Select>
-                                                }
-                                                variant="outlined"
-                                                fullWidth
-                                                name="ownChildren"
-                                                error={errors.ownChildren ? true : false}
+                                                )}
                                             />
                                             {errors.ownChildren && <p style={{ color: '#bf1650' }}>{errors.ownChildren.message}</p>}
                                         </Grid>
@@ -1224,8 +1288,12 @@ const General = props => {
                                             </Typography>
                                             <Controller
                                                 control={control}
-                                                as={
-                                                    <Select>
+                                                name="notOwnChildren"
+                                                render={({ field }) => (
+                                                    <Select
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        {...field}>
                                                         <MenuItem value={0}></MenuItem>
                                                         <MenuItem value={1}>1</MenuItem>
                                                         <MenuItem value={2}>2</MenuItem>
@@ -1236,13 +1304,8 @@ const General = props => {
                                                         <MenuItem value={7}>7</MenuItem>
                                                         <MenuItem value={8}>8</MenuItem>
                                                         <MenuItem value={9}>9</MenuItem>
-
                                                     </Select>
-                                                }
-                                                variant="outlined"
-                                                fullWidth
-                                                name="notOwnChildren"
-                                                error={errors.notOwnChildren ? true : false}
+                                                )}
                                             />
                                             {errors.notOwnChildren && <p style={{ color: '#bf1650' }}>{errors.notOwnChildren.message}</p>}
                                         </Grid>
@@ -1259,8 +1322,14 @@ const General = props => {
                                 </Typography>
                                 <Controller
                                     control={control}
-                                    as={
-                                        <Select>
+                                    variant="outlined"
+                                    fullWidth
+                                    name="amountOfResidents"
+                                    render={({ field }) => (
+                                        <Select
+                                            variant="outlined"
+                                            fullWidth
+                                            {...field}>
                                             <MenuItem value={0}></MenuItem>
                                             <MenuItem value={1}>1</MenuItem>
                                             <MenuItem value={2}>2</MenuItem>
@@ -1269,11 +1338,8 @@ const General = props => {
                                             <MenuItem value={5}>5</MenuItem>
 
                                         </Select>
-                                    }
-                                    variant="outlined"
-                                    fullWidth
-                                    name="amountOfResidents"
-                                    error={errors.amountOfResidents ? true : false}
+                                    )}
+
                                 />
                                 {errors.amountOfResidents && <p style={{ color: '#bf1650' }}>{errors.amountOfResidents.message}</p>}
                             </Grid>
@@ -1335,7 +1401,7 @@ const General = props => {
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
-                                {Object.values(errors).length !== 0 && <Alert severity='error'>{Object.values(errors).map((error, key) => <p key={key}>{error.message}</p>)}</Alert>}
+                                {errors && Object.values(errors).length !== 0 && <Alert severity='error'>{Object.values(errors).map((error, key) => <p key={key}>{error.message}</p>)}</Alert>}
                             </Grid>
                         </Grid>
                     </div >

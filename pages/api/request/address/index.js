@@ -1,7 +1,6 @@
 
 import prisma from '@/config/db'
-import withProtect from 'middlewares/withProtect';
-import isEmpty from "lodash/isEmpty";
+import withProtect from '@/utils/withProtect';
 
 export const config = {
     api: {

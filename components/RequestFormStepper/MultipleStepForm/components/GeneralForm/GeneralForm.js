@@ -68,7 +68,6 @@ const General = props => {
     const { className, handleNext, request, setRequest, ...rest } = props;
     const [images, setImages] = useState([]);
     const classes = useStyles();
-    const [loading, setLoading] = useState(false);
 
     const { data: session, status } = useSession()
 

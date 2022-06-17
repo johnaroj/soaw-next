@@ -4,7 +4,9 @@ import clsx from 'clsx';
 import { useForm, Controller } from "react-hook-form"
 import { makeStyles } from '@mui/styles';
 import { useTheme } from '@mui/material/styles';
-import { AddressSelect, CountrySelect, StatusSelect } from './components'
+import AddressSelect from '@/components/AddressSelect'
+import CountrySelect from '@/components/CountrySelect'
+import StatusSelect from '@/components/StatusSelect'
 import { DropzoneArea } from 'material-ui-dropzone'
 import imageCompression from 'browser-image-compression';
 import {
@@ -20,15 +22,17 @@ import {
     Checkbox,
     Select,
     MenuItem,
-    CircularProgress
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { useMutation, useQuery } from "react-query";
-import { Alert } from '@mui/material/Alert';
-import { useHistory } from 'react-router-dom';
-import DateDropdown from 'components/DateDropdown';
+import { useMutation } from "react-query";
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles(theme => ({
     root: {},
@@ -62,15 +66,8 @@ const useStyles = makeStyles(theme => ({
 
 
 const General = props => {
-    const { className, ...rest } = props;
-    const history = useHistory()
-    const { data: session, status } = useSession()
-    const { data: exists, isLoading: isExisitsLoading } = useQuery('exists', async () => {
-        const result = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${session.user.id}&type=3`)
-        const data = await result.json();
-        return data;
-    })
-
+    const { className, request, ...rest } = props;
+    const router = useRouter();
     const [mutateRequest, { isLoading, isSuccess, isError, error }] = useMutation(async (data) => {
         const result = await fetch(`${process.env.REACT_APP_API}/api/request`, {
             method: 'POST',
@@ -309,7 +306,7 @@ const General = props => {
 
     useEffect(() => {
         if (isSuccess) {
-            history.push('/success')
+            router.push('/success')
         }
     }, [isSuccess, history])
 
@@ -551,13 +548,31 @@ const General = props => {
                                 >
                                     9. Fecha di nasementu
                                 </Typography>
-                                <DateDropdown
-                                    name='dateOfBirth'
-                                    startYear={new Date().getFullYear() - 100}
-                                    endYear={new Date().getFullYear()}
-                                    reverse
-                                    register={register}
-                                    setDateValue={handleBirthdayChange} />
+                                <Controller
+                                    id="dateOfBirth"
+                                    name="dateOfBirth"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} lo>
+                                            <DatePicker
+                                                {...field}
+                                                label="Fecha di nasementu"
+                                                disableFuture
+                                                mask="__-__-____"
+                                                inputFormat="dd-MM-yyyy"
+                                                value={field.value}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
+                                                    fullWidth
+                                                    error={errors?.dateOfBirth ? true : false} />}
+                                                onChange={(e) => {
+                                                    console.log(e)
+                                                    field.onChange(e);
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    )}
+                                />
                                 {errors.dateOfBirth && <p style={{ color: '#bf1650' }}>{errors.dateOfBirth.message}</p>}
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -571,19 +586,17 @@ const General = props => {
                                 <Controller
                                     id="identificationNumber"
                                     name="identificationNumber"
-                                    error={errors.identificationNumber ? true : false}
                                     control={control}
                                     render={
-                                        ({ value, onChange, onBlur }) => (
+                                        ({ field }) => (
                                             <TextField
+                                                {...field}
                                                 label="Number di identifikashon"
                                                 variant="outlined"
                                                 fullWidth
                                                 required
                                                 type='number'
-                                                onBlur={onBlur}
-                                                value={value || ''}
-                                                onChange={e => onChange(handleAutoFillDate(e))}
+                                                value={field.value || ''}
                                             />
                                         )
                                     }
@@ -592,47 +605,43 @@ const General = props => {
                                 {errors.identificationNumber && <p style={{ color: '#bf1650' }}>{errors.identificationNumber.message}</p>}
                             </Grid>
                             <Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    11. Sekso
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="gender"
                                     error={errors.gender ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                11. Sekso
-                                            </Typography>
-                                            <RadioGroup aria-label="gender" name="gender" value={value} onChange={onChange} row>
-                                                <FormControlLabel value="female" control={<Radio />} label="Femenino" />
-                                                <FormControlLabel value="male" control={<Radio />} label="Maskulino" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value="female" control={<Radio />} label="Femenino" />
+                                            <FormControlLabel value="male" control={<Radio />} label="Maskulino" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.gender && <p style={{ color: '#bf1650' }}>{errors.gender.message}</p>}
                             </Grid>
                             <Grid item xs={12} sm={6}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    12. Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="identificationType"
                                     error={errors.identificationType ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                12. Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes?
-                                            </Typography>
-                                            <RadioGroup aria-label="identificationType" name="identificationType" value={value} onChange={onChange} row>
-                                                <FormControlLabel value="driversLicense" control={<Radio />} label="Reibeweis" />
-                                                <FormControlLabel value="ID" control={<Radio />} label="Sédula" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value="driversLicense" control={<Radio />} label="Reibeweis" />
+                                            <FormControlLabel value="ID" control={<Radio />} label="Sédula" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.identificationType && <p style={{ color: '#bf1650' }}>{errors.identificationType.message}</p>}
@@ -646,13 +655,31 @@ const General = props => {
                                 >
                                     13.	Fecha di vensementu di bo identifikashon usá*
                                 </Typography>
-                                <DateDropdown
-                                    name='expiryDate'
-                                    startYear={new Date().getFullYear() - 10}
-                                    endYear={new Date().getFullYear() + 10}
-                                    reverse
-                                    register={register}
-                                    setDateValue={handleExpiryDate} />
+                                <Controller
+                                    id="expiryDate"
+                                    name="expiryDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} lo>
+                                            <DatePicker
+                                                {...field}
+                                                label={`Fecha di vensementu di bo identifikashon usá*`}
+                                                disableFuture
+                                                mask="__-__-____"
+                                                inputFormat="dd-MM-yyyy"
+                                                value={field.value}
+                                                renderInput={(params) => <TextField
+                                                    {...params}
+                                                    fullWidth
+                                                    error={errors?.expiryDate ? true : false} />}
+                                                onChange={(e) => {
+                                                    console.log(e)
+                                                    field.onChange(e);
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    )}
+                                />
                                 {errors.expiryDate && <p style={{ color: '#bf1650' }}>{errors.expiryDate.message}</p>}
 
                             </Grid>
@@ -666,48 +693,50 @@ const General = props => {
                                 </Typography>
                                 <Controller
                                     classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                    as={DropzoneArea}
-                                    dropzoneText={`‘Upload’ prueba di bo identifikashon`}
-                                    name="proofOfID"
-                                    label="‘Upload’ prueba di entrada di bo kas"
                                     control={control}
-                                    error={errors.proofOfID ? true : false}
-                                    onDrop={(files) => onDropHandler(files, 22)}
-                                    onDelete={(file) => onDeleteHandler(file, 22)}
-                                    filesLimit={1}
-                                    acceptedFiles={['image/*', '.pdf']}
-                                    showPreviews={true}
-                                    showPreviewsInDropzone={false}
-                                    useChipsForPreview
-                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                    previewChipProps={{ classes: { root: classes.previewChip } }}
-                                    previewText="Selected files"
-                                />
+                                    name="proofOfID"
+                                    render={({ field }) => (
+                                        <DropzoneArea
+                                            {...field}
+                                            dropzoneText={`‘Upload’ prueba di bo identifikashon`}
+                                            label="‘Upload’ prueba di entrada di bo kas"
+                                            error={errors.proofOfID ? true : false}
+                                            onDrop={(files) => onDropHandler(files, 22)}
+                                            onDelete={(file) => onDeleteHandler(file, 22)}
+                                            filesLimit={1}
+                                            acceptedFiles={['image/*', '.pdf']}
+                                            showPreviews={true}
+                                            showPreviewsInDropzone={false}
+                                            useChipsForPreview
+                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                            previewChipProps={{ classes: { root: classes.previewChip } }}
+                                            previewText="Selected files"
+                                        />
+                                    )} />
+
                                 {errors.proofOfID && <p style={{ color: '#bf1650' }}>{errors.proofOfID.message}</p>}
                             </Grid>
                             <Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    14.	Fuente di entrada*
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="sourceOfIncome"
                                     error={errors.sourceOfIncome ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                14.	Fuente di entrada*
-                                            </Typography>
-                                            <RadioGroup aria-label="contractee" name="contractee" value={value} onChange={onChange}>
-                                                <FormControlLabel value="noIncome" control={<Radio />} label="No tin entrada" />
-                                                <FormControlLabel value="lessIncome" control={<Radio />} label="Menos entrada na kas" />
-                                                <FormControlLabel value="salary" control={<Radio />} label="Salario (trabou)" />
-                                                <FormControlLabel value="pensionMoreThan500" control={<Radio />} label="Penshun mas di 500" />
-                                                <FormControlLabel value="pensionLessThan500" control={<Radio />} label="Penshun mènos 500" />
-                                                <FormControlLabel value="other" control={<Radio />} label="Otro" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field}>
+                                            <FormControlLabel value="noIncome" control={<Radio />} label="No tin entrada" />
+                                            <FormControlLabel value="lessIncome" control={<Radio />} label="Menos entrada na kas" />
+                                            <FormControlLabel value="salary" control={<Radio />} label="Salario (trabou)" />
+                                            <FormControlLabel value="pensionMoreThan500" control={<Radio />} label="Penshun mas di 500" />
+                                            <FormControlLabel value="pensionLessThan500" control={<Radio />} label="Penshun mènos 500" />
+                                            <FormControlLabel value="other" control={<Radio />} label="Otro" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.sourceOfIncome && <p style={{ color: '#bf1650' }}>{errors.sourceOfIncome.message}</p>}
@@ -734,24 +763,22 @@ const General = props => {
                                 {errors.currentAddressNumber && <p style={{ color: '#bf1650' }}>{errors.currentAddressNumber.message}</p>}
                             </Grid> */}
                             <Grid item xs={12} sm={JSON.parse(watch('hasLostJobDueCorona')) ? 6 : false}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    15. Bo a pèrdè trabou pa motibu di Covid?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="hasLostJobDueCorona"
                                     error={errors.children ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                15. Bo a pèrdè trabou pa motibu di Covid?
-                                            </Typography>
-                                            <RadioGroup aria-label="hasLostJobDueCorona" name="hasLostJobDueCorona" value={JSON.parse(value)} onChange={onChange} row>
-                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.hasLostJobDueCorona && <p style={{ color: '#bf1650' }}>{errors.hasLostJobDueCorona.message}</p>}
@@ -768,46 +795,49 @@ const General = props => {
                                     </Typography>
                                     <Controller
                                         classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                        as={DropzoneArea}
-                                        dropzoneText={`‘Upload’ karta of prueba di esaki`}
                                         name="proofOfLostJobDueCovid"
-                                        label="‘Upload’ karta of prueba di esaki"
                                         control={control}
-                                        error={errors.proofOfLostJobDueCovid ? true : false}
-                                        onDrop={(files) => onDropHandler(files, 23)}
-                                        onDelete={(file) => onDeleteHandler(file, 23)}
-                                        filesLimit={1}
-                                        acceptedFiles={['image/*', '.pdf']}
-                                        showPreviews={true}
-                                        showPreviewsInDropzone={false}
-                                        useChipsForPreview
-                                        previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                        previewChipProps={{ classes: { root: classes.previewChip } }}
-                                        previewText="Selected files"
+                                        render={({ field }) => (
+                                            <DropzoneArea
+                                                {...field}
+                                                dropzoneText={`‘Upload’ karta of prueba di esaki`}
+                                                label="‘Upload’ karta of prueba di esaki"
+                                                error={errors.proofOfLostJobDueCovid ? true : false}
+                                                onDrop={(files) => onDropHandler(files, 23)}
+                                                onDelete={(file) => onDeleteHandler(file, 23)}
+                                                filesLimit={1}
+                                                acceptedFiles={['image/*', '.pdf']}
+                                                showPreviews={true}
+                                                showPreviewsInDropzone={false}
+                                                useChipsForPreview
+                                                previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                previewText="Selected files"
+                                            />
+                                        )}
                                     />
+
                                     {errors.proofOfLostJobDueCovid && <p style={{ color: '#bf1650' }}>{errors.proofOfLostJobDueCovid.message}</p>}
                                 </Grid>
                             }
                             <Grid item xs={12} sm={6}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    16. Ki montante mensual bo tabata risibí na Krus Kòrá?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="monthlyRedCrossDonation"
                                     error={errors.monthlyRedCrossDonation ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                16. Ki montante mensual bo tabata risibí na Krus Kòrá?
-                                            </Typography>
-                                            <RadioGroup aria-label="monthlyRedCrossDonation" name="monthlyRedCrossDonation" value={value} onChange={onChange}>
-                                                <FormControlLabel value="300" control={<Radio />} label="300" />
-                                                <FormControlLabel value="450" control={<Radio />} label="450" />
-                                                <FormControlLabel value="625" control={<Radio />} label="625" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field}>
+                                            <FormControlLabel value="300" control={<Radio />} label="300" />
+                                            <FormControlLabel value="450" control={<Radio />} label="450" />
+                                            <FormControlLabel value="625" control={<Radio />} label="625" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.monthlyRedCrossDonation && <p style={{ color: '#bf1650' }}>{errors.monthlyRedCrossDonation.message}</p>}
@@ -822,22 +852,27 @@ const General = props => {
                                 </Typography>
                                 <Controller
                                     classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                    as={DropzoneArea}
-                                    dropzoneText={`‘Upload’ prueba di e karchi di Krus Kòrá, saka un potrèt di e karchi`}
                                     name="proofOfRedCrossCard"
-                                    label="‘Upload’ prueba di e karchi di Krus Kòrá, saka un potrèt di e karchi"
                                     control={control}
-                                    error={errors.proofOfRedCrossCard ? true : false}
-                                    onDrop={(files) => onDropHandler(files, 24)}
-                                    onDelete={(file) => onDeleteHandler(file, 24)}
-                                    filesLimit={1}
-                                    acceptedFiles={['image/*', '.pdf']}
-                                    showPreviews={true}
-                                    showPreviewsInDropzone={false}
-                                    useChipsForPreview
-                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                    previewChipProps={{ classes: { root: classes.previewChip } }}
-                                    previewText="Selected files"
+                                    render={({ field }) => (
+                                        <DropzoneArea
+                                            {...field}
+                                            dropzoneText={`‘Upload’ prueba di e karchi di Krus Kòrá, saka un potrèt di e karchi`}
+                                            label="‘Upload’ prueba di e karchi di Krus Kòrá, saka un potrèt di e karchi"
+                                            error={errors.proofOfRedCrossCard ? true : false}
+                                            onDrop={(files) => onDropHandler(files, 24)}
+                                            onDelete={(file) => onDeleteHandler(file, 24)}
+                                            filesLimit={1}
+                                            acceptedFiles={['image/*', '.pdf']}
+                                            showPreviews={true}
+                                            showPreviewsInDropzone={false}
+                                            useChipsForPreview
+                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                            previewChipProps={{ classes: { root: classes.previewChip } }}
+                                            previewText="Selected files"
+                                        />
+                                    )}
+
                                 />
                                 {errors.proofOfRedCrossCard && <p style={{ color: '#bf1650' }}>{errors.proofOfRedCrossCard.message}</p>}
                             </Grid>
@@ -854,16 +889,14 @@ const General = props => {
                                     name="phone1"
                                     control={control}
                                     render={
-                                        ({ value, onChange, onBlur }) => (
+                                        ({ field }) => (
                                             <TextField
                                                 label="Number di telefòn di selular"
                                                 variant="outlined"
                                                 type='number'
                                                 required
                                                 fullWidth
-                                                value={value || ''}
-                                                onChange={onChange}
-                                                onBlur={onBlur}
+                                                value={field.value || ''}
                                                 error={errors.phone1 ? true : false}
                                             />
                                         )
@@ -884,15 +917,14 @@ const General = props => {
                                     control={control}
                                     id="whatsapp"
                                     name="whatsapp"
-                                    render={({ value, onChange, onBlur }) => (
+                                    render={({ field }) => (
                                         <TextField
                                             label="Number di telefòn di whatsapp"
                                             fullWidth
                                             type='number'
                                             variant="outlined"
-                                            value={value || ''}
-                                            onChange={e => onChange(handleWhatsappNumber(e))}
-                                            onBlur={onBlur}
+                                            value={field.value || ''}
+                                            onChange={e => field.onChange(handleWhatsappNumber(e))}
                                         />
                                     )}
 
@@ -908,15 +940,20 @@ const General = props => {
                                     19. E-mail
                                 </Typography>
                                 <Controller
-                                    as={TextField}
                                     id="email"
                                     name="email"
-                                    label="Email"
-                                    variant="outlined"
-                                    type='email'
-                                    fullWidth
                                     control={control}
-                                    error={errors.email ? true : false}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Email"
+                                            variant="outlined"
+                                            type='email'
+                                            fullWidth
+                                            error={errors.email ? true : false}
+                                        />
+                                    )}
+
                                 />
                                 {errors.email && <p style={{ color: '#bf1650' }}>{errors.email.message}</p>}
                             </Grid>
@@ -929,15 +966,19 @@ const General = props => {
                                     Konfirmá e-mail
                                 </Typography>
                                 <Controller
-                                    as={TextField}
                                     id="confirmEmail"
                                     name="confirmEmail"
-                                    label="Konfirmá Email"
-                                    variant="outlined"
-                                    type='email'
-                                    fullWidth
                                     control={control}
-                                    error={errors.confirmEmail ? true : false}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Email"
+                                            variant="outlined"
+                                            type='email'
+                                            fullWidth
+                                            error={errors.email ? true : false}
+                                        />
+                                    )}
                                 />
                                 {errors.confirmEmail && <p style={{ color: '#bf1650' }}>{errors.confirmEmail.message}</p>}
                             </Grid>
@@ -1285,24 +1326,22 @@ const General = props => {
                             } */}
 
                             <Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    21.	Bo tin yu / ñetu (menor di edat biba den kas)?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="hasChildren"
                                     error={errors.children ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                21.	Bo tin yu / ñetu (menor di edat biba den kas)?
-                                            </Typography>
-                                            <RadioGroup aria-label="hasChildren" name="hasChildren" value={JSON.parse(value)} onChange={onChange} row>
-                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                            </RadioGroup>
-                                        </>
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                        </RadioGroup>
                                     )}
                                 />
                                 {errors.hasChildren && <p style={{ color: '#bf1650' }}>{errors.hasChildren.message}</p>}
@@ -1320,8 +1359,13 @@ const General = props => {
                                         </Typography>
                                         <Controller
                                             control={control}
-                                            as={
-                                                <Select>
+                                            name="ownChildren"
+                                            render={({ field }) => (
+                                                <Select
+                                                    {...field}
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    error={errors.ownChildren ? true : false}>
                                                     <MenuItem value={0}></MenuItem>
                                                     <MenuItem value={1}>1</MenuItem>
                                                     <MenuItem value={2}>2</MenuItem>
@@ -1334,11 +1378,9 @@ const General = props => {
                                                     <MenuItem value={9}>9</MenuItem>
 
                                                 </Select>
-                                            }
-                                            variant="outlined"
-                                            fullWidth
-                                            name="ownChildren"
-                                            error={errors.ownChildren ? true : false}
+                                            )}
+
+
                                         />
                                         {errors.ownChildren && <p style={{ color: '#bf1650' }}>{errors.ownChildren.message}</p>}
                                     </Grid>
@@ -1354,21 +1396,22 @@ const General = props => {
                                 </Typography>
                                 <Controller
                                     control={control}
-                                    as={
-                                        <Select>
+                                    name="amountOfResidents"
+                                    render={({ field }) =>
+                                        <Select
+                                            {...field}
+                                            variant="outlined"
+                                            fullWidth
+                                            error={errors.amountOfResidents ? true : false}
+                                        >
                                             <MenuItem value={0}></MenuItem>
                                             <MenuItem value={1}>1</MenuItem>
                                             <MenuItem value={2}>2</MenuItem>
                                             <MenuItem value={3}>3</MenuItem>
                                             <MenuItem value={4}>4</MenuItem>
                                             <MenuItem value={5}>5</MenuItem>
-
                                         </Select>
                                     }
-                                    variant="outlined"
-                                    fullWidth
-                                    name="amountOfResidents"
-                                    error={errors.amountOfResidents ? true : false}
                                 />
                                 {errors.amountOfResidents && <p style={{ color: '#bf1650' }}>{errors.amountOfResidents.message}</p>}
                             </Grid>

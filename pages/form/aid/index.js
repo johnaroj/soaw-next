@@ -261,7 +261,7 @@ export const getServerSideProps = async ({ req, query }) => {
                 proofOfRegisteredPartner: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 4)),
                 proofOfDivorce: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 5)),
                 proofOfDeath: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 6)),
-                //proofOfChildren: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 7)),
+                proofOfChildren: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 7)),
                 proofOfCannotWork: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 9)),
                 proofOfIncomeLastEmployer: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 15)),
                 proofOfJobSeeking: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 8)),
@@ -270,11 +270,11 @@ export const getServerSideProps = async ({ req, query }) => {
                 proofOfMedicalTreatment: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 12)),
                 proofOfRentalContract: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 16)),
                 proofOfRentalPayment: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 17)),
-                //proofOfPsychologicalLimitationDiagnosticReport: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 18)),
-                //proofOfMentalDisorderDiagnosticReport: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 19)),
+                proofOfPsychologicalLimitationDiagnosticReport: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 18)),
+                proofOfMentalDisorderDiagnosticReport: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 19)),
                 proofOfContract: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 20)),
                 proofOfVerdict: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 21)),
-                //proofOfID: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 22)),
+                proofOfID: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 22)),
             };
 
         }

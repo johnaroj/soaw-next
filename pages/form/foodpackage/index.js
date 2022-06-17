@@ -2,8 +2,8 @@ import React from 'react';
 import { makeStyles } from '@mui/styles';
 import { Grid } from '@mui/material';
 import { SectionAlternate, CardBase } from '@/components/organisms';
-import Hero from '@/components/ResilienceForm/Hero';
-import General from '@/components/ResilienceForm/General';
+import Hero from '@/components/FoodPackage/Hero';
+import General from '@/components/FoodPackage/General';
 import Main from '@/layouts/Main';
 
 const useStyles = makeStyles(theme => ({
@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
 
 
 
-const ResilienceForm = ({ initialRequest }) => {
+const FoodPackageForm = ({ initialRequest }) => {
     const classes = useStyles();
 
     return (
@@ -38,7 +38,7 @@ const ResilienceForm = ({ initialRequest }) => {
             <SectionAlternate className={classes.section}>
 
                 <CardBase withShadow align="left">
-                    <General request={initialRequest} />
+                    <General initialRequest={initialRequest} />
                 </CardBase>
 
             </SectionAlternate>
@@ -46,11 +46,11 @@ const ResilienceForm = ({ initialRequest }) => {
     );
 };
 
-export default ResilienceForm;
+export default FoodPackageForm;
 
-ResilienceForm.getLayout = function getLayout(ResilienceForm) {
+FoodPackageForm.getLayout = function getLayout(FoodPackageForm) {
     return (
-        <Main>{ResilienceForm}</Main>
+        <Main>{FoodPackageForm}</Main>
     )
 }
 
@@ -107,30 +107,43 @@ export const getServerSideProps = async ({ req, query }) => {
         identificationType: '',
         expiryDate: null,
         proofOfID: [],
-        hasLostJobDueCorona: null,
-        monthlyRedCrossDonation: '',
+        firstNamePartner: '',
+        lastNamePartner: '',
         identificationNumberPartner: 0,
-        proofOfLostJobDueCovid: [],
-        sourceOfIncome: '',
+        proofOfPartnerIncome: [],
+        proofOfMarriage: [],
+        proofOfDivorce: [],
+        proofOfVerdict: [],
+        proofOfDeath: [],
+        hasRelationship: null,
+        livingTogether: null,
+        livingTogetherAddress: '',
+        livingTogetherAddressNumber: '',
         hasChildren: null,
         proofOfChildren: [],
         ownChildren: 0,
         notOwnChildren: 0,
         amountOfResidents: 0,
+        created: null,
+        updated: null,
         status: 'INISIO',
         confirmation: false
     }
 
     if (requestListData || !!requestListData.length) {
         const original = !!requestListData.length ? requestListData.find(request => request.id === +query.id)
-            : requestListData.find(request => request.type === 3);
+            : requestListData.find(request => request.type === 2);
 
         initialRequest = {
             ...original,
             edited: true,
             status: 'MODIFIKA',
             proofOfResident: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 1)),
-            proofOfLostJobDueCovid: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 23)),
+            proofOfPartnerIncome: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 2)),
+            proofOfMarriage: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 3)),
+            proofOfRegisteredPartner: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 4)),
+            proofOfDivorce: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 5)),
+            proofOfDeath: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 6)),
             proofOfChildren: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 7)),
             proofOfID: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 22)),
         };
@@ -149,6 +162,4 @@ export const getServerSideProps = async ({ req, query }) => {
     }
 
 }
-
-
 
