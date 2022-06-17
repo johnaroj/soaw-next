@@ -93,7 +93,7 @@ const countries = [
     "Costa Rica",
     "Cuba",
     "Cape Verde",
-    "Curacao",
+    "Curaçao",
     "Christmas Island",
     "Cyprus",
     "Czech Republic",

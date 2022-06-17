@@ -3,9 +3,7 @@ import clsx from 'clsx';
 import { useForm, Controller } from "react-hook-form"
 import { makeStyles } from '@mui/styles';
 import { useTheme } from '@mui/material/styles'
-import { DropzoneArea } from "react-dropzone";
 import imageCompression from 'browser-image-compression';
-import { ConvertImagesToFile } from '@/utils/convertImages';
 import {
     useMediaQuery,
     Grid,
@@ -18,19 +16,20 @@ import {
     Radio,
     Select,
     MenuItem,
+    Alert,
     CircularProgress
 } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { useKeycloak } from '@react-keycloak/ssr';
-import { Alert } from '@mui/material/Alert';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import DatePicker from '@mui/lab/DatePicker';
+import nlLocale from 'date-fns/locale/nl';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers';
 import AddressSelect from '../AddressSelect';
 import CountrySelect from '../CountrySelect';
 import StatusSelect from '../StatusSelect';
-import { useStateValue } from 'StateProvider';
-import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react';
+import { DropzoneArea } from 'material-ui-dropzone';
 
 const useStyles = makeStyles(theme => ({
     root: {},
@@ -66,18 +65,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const General = props => {
-    const router = useRouter()
-    let {
-        reapply
-    } = router.query;
-
-    const { className, handleNext, id, ...rest } = props;
+    const { className, handleNext, request, setRequest, ...rest } = props;
     const [images, setImages] = useState([]);
-    const { request, setRequest } = useStateValue()
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
-    const [exist, setExist] = useState(false);
-    const { keycloak } = useKeycloak()
+
+    const { data: session, status } = useSession()
 
     const theme = useTheme();
     const isMd = useMediaQuery(theme.breakpoints.up('md'), {
@@ -164,81 +157,20 @@ const General = props => {
         resolver: yupResolver(schema),
     })
 
-    const fetchRequest = async () => {
-        setLoading(true)
-        let result = {};
-        try {
-            const requests = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${keycloak?.idTokenParsed?.sub}&type=1`)
-            const data = await requests.json()
 
-            if (data.length > 0) {
-                if (id && !reapply) {
-                    const updated = data.find(e => e.id === Number(id))
-                    result = {
-                        ...updated,
-                        edited: !!id,
-                        status: id ? '' : 'MODIFIKA',
-                        proofOfResident: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 1)),
-                        proofOfPartnerIncome: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 2)),
-                        proofOfMarriage: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 3)),
-                        proofOfRegisteredPartner: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 4)),
-                        proofOfDivorce: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 5)),
-                        proofOfDeath: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 6)),
-                        proofOfChildren: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 7)),
-                        proofOfCannotWork: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 9)),
-                        proofOfIncomeLastEmployer: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 15)),
-                        proofOfJobSeeking: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 8)),
-                        currentAccountStatements: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 10)),
-                        savingsAccountStatements: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 11)),
-                        proofOfMedicalTreatment: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 12)),
-                        proofOfRentalContract: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 16)),
-                        proofOfRentalPayment: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 17)),
-                        proofOfPsychologicalLimitationDiagnosticReport: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 18)),
-                        proofOfMentalDisorderDiagnosticReport: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 19)),
-                        proofOfContract: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 20)),
-                        proofOfVerdict: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 21)),
-                        proofOfID: await ConvertImagesToFile(request?.images?.filter(image => image.categoryId === 22)),
-                    }
-                    setRequest(result);
-
-                } else {
-                    setRequest({
-                        ...request,
-                        id: data[0].id,
-                        edited: !!data[0].id,
-                        status: data[0].id ? '' : 'MODIFIKA',
-                        created: data[0].created
-                    });
-
-                }
-
-                setExist(true)
-                setLoading(false)
-            }
-            setLoading(false);
-        } catch (error) {
-            console.log(error)
-        }
-
-
-    }
-
-    useEffect(() => {
-        fetchRequest()
-    }, [])
 
     const onSubmit = (data) => {
         data.images = [...request.images, ...images]
         setRequest({
             ...request,
             ...data,
-            userId: keycloak.idTokenParsed.sub
+            userId: session.user.id
         })
 
         handleNext()
 
     }
-    const { acceptedFiles, getRootProps, getInputProps, isDragAccept } = useDropzone({})
+
     const onDeleteHandler = (file, category) => {
         setImages(images.filter(image => (image.name !== file.name && image.categoryId !== category)));
     }
@@ -331,8 +263,8 @@ const General = props => {
     }, [])
 
     return (
-        loading || !mounted ? <CircularProgress color="primary" size={180} /> :
-            !id && !reapply && exist ? <Alert severity='warning' style={{ width: '100%' }}>Bo tin un petishon kaba</Alert> :
+        !mounted ? <CircularProgress color="primary" size={180} /> :
+            request.id && !request.reapply && !request.edited ? <Alert severity='warning' style={{ width: '100%' }}>Bo tin un petishon kaba</Alert> :
                 <div className={clsx(classes.root, className)} {...rest}>
                     <Grid container spacing={isMd ? 4 : 2}>
 
@@ -372,7 +304,7 @@ const General = props => {
                                 )}
 
                             />
-                            {errors.lastName && <p style={{ color: '#bf1650' }}>{errors.lastName.message}</p>}
+                            {errors?.lastName && <p style={{ color: '#bf1650' }}>{errors?.lastName.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -399,7 +331,7 @@ const General = props => {
                                     />
                                 )}
                             />
-                            {errors.firstName && <p style={{ color: '#bf1650' }}>{errors.firstName.message}</p>}
+                            {errors?.firstName && <p style={{ color: '#bf1650' }}>{errors?.firstName.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -415,9 +347,9 @@ const General = props => {
                                 control={control}
                                 required={true}
                                 placeholder="Si bo no por haña bo adrès, por fabor skibi'é."
-                                error={errors.registeredAddress ? true : false}
+                                error={errors?.registeredAddress ? true : false}
                             />
-                            {errors.registeredAddress && <p style={{ color: '#bf1650' }}>{errors.registeredAddress.message}</p>}
+                            {errors?.registeredAddress && <p style={{ color: '#bf1650' }}>{errors?.registeredAddress.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -443,7 +375,7 @@ const General = props => {
                                     />
                                 )}
                             />
-                            {errors.registeredAddressNumber && <p style={{ color: '#bf1650' }}>{errors.registeredAddressNumber.message}</p>}
+                            {errors?.registeredAddressNumber && <p style={{ color: '#bf1650' }}>{errors?.registeredAddressNumber.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -459,9 +391,9 @@ const General = props => {
                                 control={control}
                                 required={true}
                                 placeholder="Si bo no por haña bo adrès, por fabor skibi'é"
-                                error={errors.currentAddress ? true : false}
+                                error={errors?.currentAddress ? true : false}
                             />
-                            {errors.currentAddress && <p style={{ color: '#bf1650' }}>{errors.currentAddress.message}</p>}
+                            {errors?.currentAddress && <p style={{ color: '#bf1650' }}>{errors?.currentAddress.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -487,7 +419,7 @@ const General = props => {
                                     />
                                 )}
                             />
-                            {errors.currentAddressNumber && <p style={{ color: '#bf1650' }}>{errors.currentAddressNumber.message}</p>}
+                            {errors?.currentAddressNumber && <p style={{ color: '#bf1650' }}>{errors?.currentAddressNumber.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -502,9 +434,9 @@ const General = props => {
                                 name="placeOfBirth"
                                 label="Pais di nasementu"
                                 required={true}
-                                error={errors.placeOfBirth ? true : false}
+                                error={errors?.placeOfBirth ? true : false}
                             />
-                            {errors.placeOfBirth && <p style={{ color: '#bf1650' }}>{errors.placeOfBirth.message}</p>}
+                            {errors?.placeOfBirth && <p style={{ color: '#bf1650' }}>{errors?.placeOfBirth.message}</p>}
                         </Grid>
                         <Grid item xs={6} sm={3}>
                             <Typography
@@ -543,6 +475,7 @@ const General = props => {
                                     render={({ field }) => (
                                         <DropzoneArea
                                             {...field}
+                                            initialFiles={request.proofOfResident}
                                             dropzoneText="‘Upload’ bo pèrmit di estadia (image/* òf .pdf)"
                                             error={errors?.proofOfResident ? true : false}
                                             onDrop={(files) => onDropHandler(files, 1)}
@@ -559,7 +492,7 @@ const General = props => {
                                     )}
                                 />
 
-                                {errors.proofOfResident && <p style={{ color: '#bf1650' }}>{errors.proofOfResident.message}</p>}
+                                {errors?.proofOfResident && <p style={{ color: '#bf1650' }}>{errors?.proofOfResident.message}</p>}
                             </Grid>
                         }
                         <Grid item xs={12} sm={6}>
@@ -587,6 +520,10 @@ const General = props => {
                                                 {...params}
                                                 fullWidth
                                                 error={errors?.dateOfBirth ? true : false} />}
+                                            onChange={(e) => {
+                                                console.log(e)
+                                                field.onChange(e);
+                                            }}
                                         />
                                     </LocalizationProvider>
                                 )}
@@ -622,7 +559,7 @@ const General = props => {
                                     )
                                 }
                             />
-                            {errors.identificationNumber && <p style={{ color: '#bf1650' }}>{errors.identificationNumber.message}</p>}
+                            {errors?.identificationNumber && <p style={{ color: '#bf1650' }}>{errors?.identificationNumber.message}</p>}
                         </Grid>
                         <Grid item xs={12}>
                             <Typography
@@ -642,7 +579,7 @@ const General = props => {
                                     </RadioGroup>
                                 )}
                             />
-                            {errors.gender && <p style={{ color: '#bf1650' }}>{errors.gender.message}</p>}
+                            {errors?.gender && <p style={{ color: '#bf1650' }}>{errors?.gender.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -663,7 +600,7 @@ const General = props => {
                                 )}
                             />
 
-                            {errors.identificationType && <p style={{ color: '#bf1650' }}>{errors.identificationType.message}</p>}
+                            {errors?.identificationType && <p style={{ color: '#bf1650' }}>{errors?.identificationType.message}</p>}
                         </Grid>
 
                         <Grid item xs={12} sm={6}>
@@ -706,24 +643,29 @@ const General = props => {
                             </Typography>
                             <Controller
                                 classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                as={DropzoneArea}
                                 name="proofOfID"
-                                initialFiles={request.proofOfID}
-                                dropzoneText="‘Upload’ prueba di bo identifikashon"
                                 control={control}
-                                error={errors.proofOfID ? true : false}
-                                onDrop={(files) => onDropHandler(files, 22)}
-                                onDelete={(file) => onDeleteHandler(file, 22)}
-                                filesLimit={1}
-                                acceptedFiles={['image/*', '.pdf']}
-                                showPreviews={true}
-                                showPreviewsInDropzone={false}
-                                useChipsForPreview
-                                previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                previewChipProps={{ classes: { root: classes.previewChip } }}
-                                previewText="Selected files"
+                                render={({ field }) => (
+                                    <DropzoneArea
+                                        {...field}
+                                        initialFiles={request.proofOfID}
+                                        dropzoneText="‘Upload’ prueba di bo identifikashon"
+                                        error={errors?.proofOfID ? true : false}
+                                        onDrop={(files) => onDropHandler(files, 22)}
+                                        onDelete={(file) => onDeleteHandler(file, 22)}
+                                        filesLimit={1}
+                                        acceptedFiles={['image/*', '.pdf']}
+                                        showPreviews={true}
+                                        showPreviewsInDropzone={false}
+                                        useChipsForPreview
+                                        previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                        previewChipProps={{ classes: { root: classes.previewChip } }}
+                                        previewText="Selected files"
+                                    />
+                                )}
+
                             />
-                            {errors.proofOfID && <p style={{ color: '#bf1650' }}>{errors.proofOfID.message}</p>}
+                            {errors?.proofOfID && <p style={{ color: '#bf1650' }}>{errors?.proofOfID.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -746,14 +688,14 @@ const General = props => {
                                             type='number'
                                             required
                                             fullWidth
-                                            value={value || ''}
-                                            error={errors.phone1 ? true : false}
+                                            value={field.value || ''}
+                                            error={errors?.phone1 ? true : false}
                                         />
                                     )
                                 }
 
                             />
-                            {errors.phone1 && <p style={{ color: '#bf1650' }}>{errors.phone1.message}</p>}
+                            {errors?.phone1 && <p style={{ color: '#bf1650' }}>{errors?.phone1.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -774,7 +716,7 @@ const General = props => {
                                         fullWidth
                                         type='number'
                                         variant="outlined"
-                                        value={value || ''}
+                                        value={field.value || ''}
                                         error={errors?.whatsapp ? true : false}
                                     />
                                 )}
@@ -831,11 +773,12 @@ const General = props => {
                                         type='email'
                                         fullWidth
                                         variant="outlined"
-                                        error={errors.confirmEmail ? true : false}
+                                        value={field.value || ''}
+                                        error={errors?.confirmEmail ? true : false}
                                     />
                                 )}
                             />
-                            {errors.email && <p style={{ color: '#bf1650' }}>{errors.email.message}</p>}
+                            {errors?.email && <p style={{ color: '#bf1650' }}>{errors?.email.message}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Typography
@@ -856,13 +799,14 @@ const General = props => {
                                         fullWidth
                                         type='email'
                                         variant="outlined"
-                                        error={errors.confirmEmail ? true : false}
+                                        value={field.value || ''}
+                                        error={errors?.confirmEmail ? true : false}
                                     />
                                 )}
 
 
                             />
-                            {errors.confirmEmail && <p style={{ color: '#bf1650' }}>{errors.confirmEmail.message}</p>}
+                            {errors?.confirmEmail && <p style={{ color: '#bf1650' }}>{errors?.confirmEmail.message}</p>}
                         </Grid>
                         <Grid item xs={12}>
                             <Typography
@@ -877,9 +821,9 @@ const General = props => {
                                 label="Estado sivil"
                                 control={control}
                                 required={true}
-                                error={errors.maritalStatus ? true : false}
+                                error={errors?.maritalStatus ? true : false}
                             />
-                            {errors.maritalStatus && <p style={{ color: '#bf1650' }}>{errors.maritalStatus.message}</p>}
+                            {errors?.maritalStatus && <p style={{ color: '#bf1650' }}>{errors?.maritalStatus.message}</p>}
                         </Grid>
                         {['divorced', 'divorcedPartnership'].includes(watch("maritalStatus") ?? request.maritalStatus) &&
                             (
@@ -894,24 +838,28 @@ const General = props => {
                                         </Typography>
                                         <Controller
                                             classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                            as={DropzoneArea}
                                             name="proofOfDivorce"
-                                            dropzoneText={`‘Upload’ prueba di divorsio ${(watch("maritalStatus") ?? request.maritalStatus) === 'divorcedPartnership' && `di konbibensia legalisá di pareha`}(image/* òf .pdf)`}
                                             control={control}
-                                            error={errors.proofOfDivorce ? true : false}
-                                            onDrop={(files) => onDropHandler(files, 5)}
-                                            onDelete={(file) => onDeleteHandler(file, 5)}
-                                            filesLimit={1}
-                                            acceptedFiles={['image/*', '.pdf']}
-                                            showPreviews={true}
-                                            showPreviewsInDropzone={false}
-                                            useChipsForPreview
-                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                            previewChipProps={{ classes: { root: classes.previewChip } }}
-                                            previewText="Selected files"
+                                            render={({ field }) => (
+                                                <DropzoneArea
+                                                    {...field}
+                                                    initialFiles={request.proofOfDivorce}
+                                                    dropzoneText={`‘Upload’ prueba di divorsio ${(watch("maritalStatus") ?? request.maritalStatus) === 'divorcedPartnership' && `di konbibensia legalisá di pareha`}(image/* òf .pdf)`}
+                                                    error={errors?.proofOfDivorce ? true : false}
+                                                    onDrop={(files) => onDropHandler(files, 5)}
+                                                    onDelete={(file) => onDeleteHandler(file, 5)}
+                                                    filesLimit={1}
+                                                    acceptedFiles={['image/*', '.pdf']}
+                                                    showPreviews={true}
+                                                    showPreviewsInDropzone={false}
+                                                    useChipsForPreview
+                                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                    previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                    previewText="Selected files"
+                                                />)}
                                         />
 
-                                        {errors.proofOfDivorce && <p style={{ color: '#bf1650' }}>{errors.proofOfDivorce.message}</p>}
+                                        {errors?.proofOfDivorce && <p style={{ color: '#bf1650' }}>{errors?.proofOfDivorce.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -923,23 +871,27 @@ const General = props => {
                                         </Typography>
                                         <Controller
                                             classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                            as={DropzoneArea}
                                             name="proofOfVerdict"
-                                            dropzoneText={`‘Upload’ prueba di veredikto (image/* òf .pdf)`}
                                             control={control}
-                                            error={errors.proofOfVerdict ? true : false}
-                                            onDrop={(files) => onDropHandler(files, 21)}
-                                            onDelete={(file) => onDeleteHandler(file, 21)}
-                                            filesLimit={1}
-                                            acceptedFiles={['image/*', '.pdf']}
-                                            showPreviews={true}
-                                            showPreviewsInDropzone={false}
-                                            useChipsForPreview
-                                            previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                            previewChipProps={{ classes: { root: classes.previewChip } }}
-                                            previewText="Selected files"
+                                            render={({ field }) => (
+                                                <DropzoneArea
+                                                    {...field}
+                                                    initialFiles={request.proofOfVerdict}
+                                                    dropzoneText={`‘Upload’ prueba di veredikto (image/* òf .pdf)`}
+                                                    error={errors?.proofOfVerdict ? true : false}
+                                                    onDrop={(files) => onDropHandler(files, 21)}
+                                                    onDelete={(file) => onDeleteHandler(file, 21)}
+                                                    filesLimit={1}
+                                                    acceptedFiles={['image/*', '.pdf']}
+                                                    showPreviews={true}
+                                                    showPreviewsInDropzone={false}
+                                                    useChipsForPreview
+                                                    previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                    previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                    previewText="Selected files"
+                                                />)}
                                         />
-                                        {errors.proofOfVerdict && <p style={{ color: '#bf1650' }}>{errors.proofOfVerdict.message}</p>}
+                                        {errors?.proofOfVerdict && <p style={{ color: '#bf1650' }}>{errors?.proofOfVerdict.message}</p>}
                                     </Grid>
                                 </>
                             )
@@ -957,16 +909,13 @@ const General = props => {
                                     control={control}
                                     name="hasRelationship"
                                     render={({ field }) => (
-                                        <>
-
-                                            <RadioGroup {...field} row>
-                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                            </RadioGroup>
-                                        </>
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                        </RadioGroup>
                                     )}
                                 />
-                                {errors.hasRelationship && <p style={{ color: '#bf1650' }}>{errors.hasRelationship.message}</p>}
+                                {errors?.hasRelationship && <p style={{ color: '#bf1650' }}>{errors?.hasRelationship.message}</p>}
                             </Grid>) : null
                         }
                         {
@@ -995,14 +944,13 @@ const General = props => {
                                                         fullWidth
                                                         required
                                                         type='text'
-                                                        error={errors.lastNamePartner ? true : false}
+                                                        error={errors?.lastNamePartner ? true : false}
                                                         value={field.value || ''}
-                                                        onChange={e => field.onChange(handleAutoFillId(e))}
                                                     />
                                                 )
                                             }
                                         />
-                                        {errors.lastNamePartner && <p style={{ color: '#bf1650' }}>{errors.lastNamePartner.message}</p>}
+                                        {errors?.lastNamePartner && <p style={{ color: '#bf1650' }}>{errors?.lastNamePartner.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1022,9 +970,9 @@ const General = props => {
                                             required
                                             fullWidth
                                             control={control}
-                                            error={errors.firstNamePartner ? true : false}
+                                            error={errors?.firstNamePartner ? true : false}
                                         />
-                                        {errors.firstNamePartner && <p style={{ color: '#bf1650' }}>{errors.firstNamePartner.message}</p>}
+                                        {errors?.firstNamePartner && <p style={{ color: '#bf1650' }}>{errors?.firstNamePartner.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1046,15 +994,14 @@ const General = props => {
                                                         variant="outlined"
                                                         type='number'
                                                         fullWidth
-                                                        error={errors.identificationNumberPartner ? true : false}
-                                                        value={value || ''}
-                                                        onChange={onChange}
+                                                        error={errors?.identificationNumberPartner ? true : false}
+                                                        value={field.value || ''}
                                                     />
                                                 )
                                             }
 
                                         />
-                                        {errors.identificationNumberPartner && <p style={{ color: '#bf1650' }}>{errors.identificationNumberPartner.message}</p>}
+                                        {errors?.identificationNumberPartner && <p style={{ color: '#bf1650' }}>{errors?.identificationNumberPartner.message}</p>}
                                     </Grid>
                                     {
                                         ['married', 'registeredPartnership', 'single', 'divorced'].includes(watch("maritalStatus")?.value ?? request.maritalStatus) &&
@@ -1068,25 +1015,29 @@ const General = props => {
                                             </Typography>
                                             <Controller
                                                 classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                as={DropzoneArea}
-                                                dropzoneText={`‘Upload’ prueba di entrada di bo ${watch("maritalStatus") === "married" ? 'kasá' : 'pareha'} (image/* òf .pdf)`}
-                                                name="proofOfPartnerIncome"
-                                                label="‘Upload’ prueba di entrada di bo kas"
                                                 control={control}
-                                                error={errors.proofOfPartnerIncome ? true : false}
-                                                onDrop={(files) => onDropHandler(files, 2)}
-                                                onDelete={(file) => onDeleteHandler(file, 2)}
-                                                filesLimit={1}
-                                                acceptedFiles={['image/*', '.pdf']}
-                                                showPreviews={true}
-                                                showPreviewsInDropzone={false}
-                                                useChipsForPreview
-                                                previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                previewText="Selected files"
+                                                render={({ field }) => (
+                                                    <DropzoneArea
+                                                        {...field}
+                                                        initialFiles={request.proofOfPartnerIncome}
+                                                        name="proofOfPartnerIncome"
+                                                        label="‘Upload’ prueba di entrada di bo kas"
+                                                        dropzoneText={`‘Upload’ prueba di entrada di bo ${watch("maritalStatus") === "married" ? 'kasá' : 'pareha'} (image/* òf .pdf)`}
+                                                        error={errors?.proofOfPartnerIncome ? true : false}
+                                                        onDrop={(files) => onDropHandler(files, 2)}
+                                                        onDelete={(file) => onDeleteHandler(file, 2)}
+                                                        filesLimit={1}
+                                                        acceptedFiles={['image/*', '.pdf']}
+                                                        showPreviews={true}
+                                                        showPreviewsInDropzone={false}
+                                                        useChipsForPreview
+                                                        previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                        previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                        previewText="Selected files"
+                                                    />)}
                                             />
 
-                                            {errors.proofOfPartnerIncome && <p style={{ color: '#bf1650' }}>{errors.proofOfPartnerIncome.message}</p>}
+                                            {errors?.proofOfPartnerIncome && <p style={{ color: '#bf1650' }}>{errors?.proofOfPartnerIncome.message}</p>}
                                         </Grid>
                                     }
                                     {
@@ -1101,25 +1052,30 @@ const General = props => {
                                             </Typography>
                                             <Controller
                                                 classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                as={DropzoneArea}
-                                                dropzoneText={`‘Upload’ prueba di ${watch("maritalStatus") === 'married' ? 'matrimonio òf buki di matrimonio' : 'konbibensia legalisá di pareha'} (image/* òf .pdf)`}
-                                                name="proofOfMarriage"
-                                                label="Prueba di matrimonio"
                                                 control={control}
-                                                error={errors.proofOfMarriage ? true : false}
-                                                onDrop={(files) => onDropHandler(files, watch("maritalStatus") === 'married' ? 3 : 4)}
-                                                onDelete={(file) => onDeleteHandler(file, watch("maritalStatus") === 'married' ? 3 : 4)}
-                                                filesLimit={1}
-                                                acceptedFiles={['image/*', '.pdf']}
-                                                showPreviews={true}
-                                                showPreviewsInDropzone={false}
-                                                useChipsForPreview
-                                                previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                previewText="Selected files"
+                                                render={({ field }) => (
+                                                    <DropzoneArea
+                                                        {...field}
+                                                        initialFiles={request.proofOfMarriage}
+                                                        dropzoneText={`‘Upload’ prueba di ${watch("maritalStatus") === 'married' ? 'matrimonio òf buki di matrimonio' : 'konbibensia legalisá di pareha'} (image/* òf .pdf)`}
+                                                        name="proofOfMarriage"
+                                                        label="Prueba di matrimonio"
+                                                        error={errors?.proofOfMarriage ? true : false}
+                                                        onDrop={(files) => onDropHandler(files, watch("maritalStatus") === 'married' ? 3 : 4)}
+                                                        onDelete={(file) => onDeleteHandler(file, watch("maritalStatus") === 'married' ? 3 : 4)}
+                                                        filesLimit={1}
+                                                        acceptedFiles={['image/*', '.pdf']}
+                                                        showPreviews={true}
+                                                        showPreviewsInDropzone={false}
+                                                        useChipsForPreview
+                                                        previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                        previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                        previewText="Selected files"
+                                                    />
+                                                )}
                                             />
 
-                                            {errors.proofOfMarriage && <p style={{ color: '#bf1650' }}>{errors.proofOfMarriage.message}</p>}
+                                            {errors?.proofOfMarriage && <p style={{ color: '#bf1650' }}>{errors?.proofOfMarriage.message}</p>}
                                         </Grid>
                                     }
                                     {(watch("maritalStatus") ?? request.maritalStatus) === 'widow' &&
@@ -1133,24 +1089,28 @@ const General = props => {
                                             </Typography>
                                             <Controller
                                                 classes={{ root: classes.dropzoneRoot, text: classes.dropzoneText, icon: classes.dropzoneIcon }}
-                                                as={DropzoneArea}
-                                                dropzoneText="‘Upload’ e prueba di fayesementu di bo kasá(image/* òf .pdf)"
-                                                name="proofOfDeath"
-                                                label="Prueba di matrimonio"
                                                 control={control}
-                                                error={errors.proofOfDeath ? true : false}
-                                                onDrop={(files) => onDropHandler(files, 6)}
-                                                onDelete={(file) => onDeleteHandler(file, 6)}
-                                                filesLimit={1}
-                                                acceptedFiles={['image/*', '.pdf']}
-                                                showPreviews={true}
-                                                showPreviewsInDropzone={false}
-                                                useChipsForPreview
-                                                previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
-                                                previewChipProps={{ classes: { root: classes.previewChip } }}
-                                                previewText="Selected files"
+                                                render={({ field }) => (
+                                                    <DropzoneArea
+                                                        {...field}
+                                                        initialFiles={request.proofOfDeath}
+                                                        name="proofOfDeath"
+                                                        label="Prueba di matrimonio"
+                                                        dropzoneText="‘Upload’ e prueba di fayesementu di bo kasá(image/* òf .pdf)"
+                                                        error={errors?.proofOfDeath ? true : false}
+                                                        onDrop={(files) => onDropHandler(files, 6)}
+                                                        onDelete={(file) => onDeleteHandler(file, 6)}
+                                                        filesLimit={1}
+                                                        acceptedFiles={['image/*', '.pdf']}
+                                                        showPreviews={true}
+                                                        showPreviewsInDropzone={false}
+                                                        useChipsForPreview
+                                                        previewGridProps={{ container: { spacing: 1, direction: 'row' } }}
+                                                        previewChipProps={{ classes: { root: classes.previewChip } }}
+                                                        previewText="Selected files"
+                                                    />)}
                                             />
-                                            {errors.proofOfDeath && <p style={{ color: '#bf1650' }}>{errors.proofOfDeath.message}</p>}
+                                            {errors?.proofOfDeath && <p style={{ color: '#bf1650' }}>{errors?.proofOfDeath.message}</p>}
                                         </Grid>
                                     }
 
@@ -1159,27 +1119,25 @@ const General = props => {
                         {
                             JSON.parse(watch('hasRelationship') ?? request.hasRelationship) &&
                             (<Grid item xs={12}>
+                                <Typography
+                                    variant="subtitle1"
+                                    color="textPrimary"
+                                    className={classes.inputTitle}
+                                >
+                                    Bo ta biba huntu ku bo pareha?
+                                </Typography>
                                 <Controller
                                     control={control}
                                     name="livingTogether"
-                                    error={errors.children ? true : false}
-                                    render={({ onChange, value }) => (
-                                        <>
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="textPrimary"
-                                                className={classes.inputTitle}
-                                            >
-                                                Bo ta biba huntu ku bo pareha?
-                                            </Typography>
-                                            <RadioGroup aria-label="livingTogether" name="livingTogether" value={JSON.parse(value)} onChange={onChange} row>
-                                                <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                                <FormControlLabel value={false} control={<Radio />} label="Nò" />
-                                            </RadioGroup>
-                                        </>
+                                    error={errors?.children ? true : false}
+                                    render={({ field }) => (
+                                        <RadioGroup {...field} row>
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="Nò" />
+                                        </RadioGroup>
                                     )}
                                 />
-                                {errors.livingTogether && <p style={{ color: '#bf1650' }}>{errors.livingTogether.message}</p>}
+                                {errors?.livingTogether && <p style={{ color: '#bf1650' }}>{errors?.livingTogether.message}</p>}
                             </Grid>)
                         }
                         {
@@ -1198,9 +1156,9 @@ const General = props => {
                                             label="Na kua adrès boso ta biba"
                                             control={control}
                                             required={true}
-                                            error={errors.livingTogetherAddress ? true : false}
+                                            error={errors?.livingTogetherAddress ? true : false}
                                         />
-                                        {errors.livingTogetherAddress && <p style={{ color: '#bf1650' }}>{errors.livingTogetherAddress.message}</p>}
+                                        {errors?.livingTogetherAddress && <p style={{ color: '#bf1650' }}>{errors?.livingTogetherAddress.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1221,12 +1179,12 @@ const General = props => {
                                                     variant="outlined"
                                                     required
                                                     fullWidth
-                                                    error={errors.livingTogetherAddressNumber ? true : false}
+                                                    error={errors?.livingTogetherAddressNumber ? true : false}
                                                     value={field.value || ''}
                                                 />
                                             )}
                                         />
-                                        {errors.livingTogetherAddressNumber && <p style={{ color: '#bf1650' }}>{errors.livingTogetherAddressNumber.message}</p>}
+                                        {errors?.livingTogetherAddressNumber && <p style={{ color: '#bf1650' }}>{errors?.livingTogetherAddressNumber.message}</p>}
                                     </Grid>
                                 </>
                             )
@@ -1243,7 +1201,7 @@ const General = props => {
                             <Controller
                                 control={control}
                                 name="hasChildren"
-                                error={errors.children ? true : false}
+                                error={errors?.children ? true : false}
                                 render={({ field }) => (
                                     <RadioGroup {...field} row>
                                         <FormControlLabel value={true} control={<Radio />} label="Si" />
@@ -1251,7 +1209,7 @@ const General = props => {
                                     </RadioGroup>
                                 )}
                             />
-                            {errors.hasChildren && <p style={{ color: '#bf1650' }}>{errors.hasChildren.message}</p>}
+                            {errors?.hasChildren && <p style={{ color: '#bf1650' }}>{errors?.hasChildren.message}</p>}
                         </Grid>
                         {
                             JSON.parse(watch('hasChildren') ?? request.hasChildren) ?
@@ -1286,9 +1244,9 @@ const General = props => {
                                                 </Select>
                                             )}
 
-                                            error={errors.ownChildren ? true : false}
+                                            error={errors?.ownChildren ? true : false}
                                         />
-                                        {errors.ownChildren && <p style={{ color: '#bf1650' }}>{errors.ownChildren.message}</p>}
+                                        {errors?.ownChildren && <p style={{ color: '#bf1650' }}>{errors?.ownChildren.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1305,9 +1263,9 @@ const General = props => {
                                             render={({ field }) => (
                                                 <DropzoneArea
                                                     {...field}
+                                                    initialFiles={request.proofOfChildren}
                                                     dropzoneText="‘Upload’ akto di nasementu di bo yu(nan)/buki di famia (image/* òf .pdf)"
-                                                    control={control}
-                                                    error={errors.proofOfChildren ? true : false}
+                                                    error={errors?.proofOfChildren ? true : false}
                                                     onDrop={(files) => onDropHandler(files, 7)}
                                                     onDelete={(file) => onDeleteHandler(file, 7)}
                                                     filesLimit={1}
@@ -1321,7 +1279,7 @@ const General = props => {
                                                 />
                                             )}
                                         />
-                                        {errors.proofOfChildren && <p style={{ color: '#bf1650' }}>{errors.proofOfChildren.message}</p>}
+                                        {errors?.proofOfChildren && <p style={{ color: '#bf1650' }}>{errors?.proofOfChildren.message}</p>}
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1352,9 +1310,9 @@ const General = props => {
 
                                                 </Select>
                                             )}
-                                            error={errors.notOwnChildren ? true : false}
+                                            error={errors?.notOwnChildren ? true : false}
                                         />
-                                        {errors.notOwnChildren && <p style={{ color: '#bf1650' }}>{errors.notOwnChildren.message}</p>}
+                                        {errors?.notOwnChildren && <p style={{ color: '#bf1650' }}>{errors?.notOwnChildren.message}</p>}
                                     </Grid>
                                 </> :
                                 null
@@ -1371,7 +1329,7 @@ const General = props => {
                             </Button>
                         </Grid>
                         <Grid item xs={12}>
-                            {Object.values(errors).length !== 0 && <Alert severity='error'>{Object.values(errors).map((error, key) => <p key={key}>{error.message}</p>)}</Alert>}
+                            {errors && Object.values(errors).length !== 0 && <Alert severity='error'>{Object.values(errors).map((error, key) => <p key={key}>{error.message}</p>)}</Alert>}
                         </Grid>
                     </Grid>
                 </div>

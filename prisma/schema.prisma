@@ -13,12 +13,13 @@ model Categories {
 }
 
 model Images {
-  id         Int     @id(map: "PK_Images") @default(autoincrement()) @map("Id")
-  requestId  Int     @map("RequestId")
-  categoryId Int     @map("CategoryId")
-  name       String? @map("Name") @db.NVarChar(100)
-  type       String? @map("Type") @db.NVarChar(50)
-  base64     String? @map("Base64") @db.NText
+  id         Int       @id(map: "PK_Images") @default(autoincrement()) @map("Id")
+  requestId  Int       @map("RequestId")
+  categoryId Int       @map("CategoryId")
+  name       String?   @map("Name") @db.NVarChar(100)
+  type       String?   @map("Type") @db.NVarChar(50)
+  base64     String?   @map("Base64") @db.NVarChar(MAX)
+  request    Requests? @relation(fields: [requestId], references: [id])
 }
 
 model RequestLogs {
@@ -323,4 +324,5 @@ model Requests {
   updated                                    DateTime? @updatedAt @map("Updated") @db.DateTime
   status                                     String?   @map("Status") @db.NVarChar(Max)
   comments                                   String?   @map("Comments") @db.NVarChar(Max)
+  images                                     Images[]
 }

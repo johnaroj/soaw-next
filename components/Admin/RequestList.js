@@ -1,264 +1,205 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React from 'react'
 import clsx from 'clsx';
-import MaterialTable, { Column } from "@material-table/core";
-import { useMediaQuery, Grid, Select, MenuItem } from '@mui/material'
+import { Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles';
-import { useTheme } from '@mui/material/styles'
-import { Alert } from '@mui/material/Alert';
-import Request from 'components/Request';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { format } from 'date-fns';
 
+const useStyles = makeStyles({
+    root: {
+        '&.MuiDataGrid-root .MuiDataGrid-columnHeader:focus, &.MuiDataGrid-root .MuiDataGrid-cell:focus': {
+            outline: 'none',
+        },
+    }
+});
 
-const RequestList = props => {
-    const { className, ...rest } = props;
-    const [isError, setError] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('');
-    const [type, setType] = useState(0);
-    const tableRef = useRef();
+const RequestList = ({ requests, setPage, error, loading, setSearch }) => {
 
-    const useStyles = makeStyles(theme => ({
-        root: {},
-    }))
     const classes = useStyles();
+    const onFilterChange = React.useCallback((filterModel) => {
+        // Here you save the data you need from the filter model
+        setSearch(filterModel.quickFilterValues.toString());
+    }, []);
 
-
-    const theme = useTheme();
-    const isMd = useMediaQuery(theme.breakpoints.up('md'), {
-        defaultMatches: true,
-    });
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true)
-        return () => { setMounted(false) }
-    }, [])
     return (
-        <div className={clsx(classes.root, className)} {...rest}>
-            <Grid container spacing={isMd ? 4 : 2}>
-                {isError ? <Grid item xs={12}><Alert variant='outlined' severity='error'>{errorMessage}</Alert></Grid> : (mounted &&
-                    <>
-                        <Grid item xs={12}>
-                            <MaterialTable
-                                tableRef={tableRef}
-                                title="Lista di Pedido"
-                                columns={[
-                                    { title: 'Fam', field: 'lastName' },
-                                    { title: 'Nomber', field: 'firstName' },
-                                    { title: 'Adrès kaminda ta registrá ofisialmente na Kranshi', field: 'registeredAddress' },
-                                    { title: 'Number di adrès na Kranshi', field: 'registeredAddressNumber' },
-                                    { title: 'Adrès kaminda bo ta biba aktualmente', field: 'currentAddress', hidden: true, export: true },
-                                    { title: 'Number di adrès aktual', field: 'currentAddressNumber', hidden: true, export: true },
-                                    { title: 'Pais di nasementu', field: 'placeOfBirth' },
-                                    { title: 'Number di identifikashon', field: 'identificationNumber' },
-                                    { title: 'Status', field: 'status', export: true },
-                                    { title: 'Nashonalidat Hulandes', field: 'hasDutchNationality', hidden: true, export: true },
-                                    { title: 'Prueba di Residensia', field: 'proofOfResident', hidden: true, export: true },
-                                    { title: 'Prueba di ID', field: 'proofOfID', hidden: true, export: true },
-                                    { title: 'Fecha di nasementu', field: 'dateOfBirth', hidden: true, export: true },
-                                    { title: 'Sekso', field: 'gender', hidden: true, export: true },
-                                    { title: 'Estado sivil', field: 'maritalStatus', hidden: true, export: true },
-                                    { title: 'Number di telefòn di selular', field: 'phone1', hidden: true, export: true },
-                                    { title: 'Number di telefòn di kas', field: 'phone2', hidden: true, export: true },
-                                    { title: 'Number di telefòn di whatsapp', field: 'whatsapp', hidden: true, export: true },
-                                    { title: 'E-mail', field: 'email', hidden: true, export: true },
-                                    { title: 'Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes na kas di bario?', field: 'identificationType', hidden: true, export: true },
-                                    { title: 'Fecha di vensementu', field: 'expiryDate', hidden: true, export: true },
-                                    { title: 'Fam di pareha', field: 'firstNamePartner', hidden: true, export: true },
-                                    { title: 'Nòmber di pareha', field: 'lastNamePartner', hidden: true, export: true },
-                                    { title: 'Number di identifikashon riba sédula di pareha', field: 'identificationNumberPartner', hidden: true, export: true },
-                                    { title: 'Prueba di entrada di bo pareha', field: 'proofOfPartnerIncome', hidden: true, export: true },
-                                    { title: 'Prueba di matrimonio', field: 'proofOfMarriage', hidden: true, export: true },
-                                    { title: 'Prueba di divorsio', field: 'proofOfDivorce', hidden: true, export: true },
-                                    { title: 'Prueba di e veredicto', field: 'proofOfVerdict', hidden: true, export: true },
-                                    { title: 'Prueba di fayesementu di bo kasá', field: 'proofOfDeath', hidden: true, export: true },
-                                    { title: 'Bo ta den un relashon aktualmente?', field: 'hasRelationship', hidden: true, export: true },
-                                    { title: 'Bo ta biba huntu ku bo pareha?', field: 'livingTogether', hidden: true, export: true },
-                                    { title: 'Na kua adrès boso ta biba?', field: 'livingTogetherAddress', hidden: true, export: true },
-                                    { title: 'Na kua number di adrès boso ta biba?', field: 'livingTogetherAddressNumber', hidden: true, export: true },
-                                    { title: 'Bo tin yu?', field: 'hasChildren', hidden: true, export: true },
-                                    { title: 'Akto di nasementu di bo yu(nan)/buki di famia', field: 'proofOfChildren', hidden: true, export: true },
-                                    { title: 'Propio yu', field: 'ownChildren', hidden: true, export: true },
-                                    { title: 'Yu di kriansa', field: 'notOwnChildren', hidden: true, export: true },
-                                    { title: 'Bo tin entrada aktualmente?', field: 'hasIncome', hidden: true, export: true },
-                                    { title: 'Kon bo a yega na e entrada aki ?', field: 'work', hidden: true, export: true },
-                                    { title: 'Mi ta kue djòp', field: 'contractee', hidden: true, export: true },
-                                    { title: 'Nòmber di kompania', field: 'employerCompanyName', hidden: true, export: true },
-                                    { title: 'Nòmber i fam di e persona  dunadó di trabou', field: 'employerName', hidden: true, export: true },
-                                    { title: 'Adrès di e trabou', field: 'employerAddress', hidden: true, export: true },
-                                    { title: 'Tipo di trabou/job bo ta hasi', field: 'employerJobType', hidden: true, export: true },
-                                    { title: 'Kuantu sèn bo tabata risibí pa bo trabou?', field: 'employerSalary', hidden: true, export: true },
-                                    { title: 'Ku ki frekuensia bo ta risibí e sèn aki?', field: 'employerPayFrequency', hidden: true, export: true },
-                                    { title: 'Kiko ta e motibu ku bo no por traha?', field: 'reasonCannotWork', hidden: true, export: true },
-                                    { title: 'Prueba ku bo no por traha', field: 'proofOfCannotWork', hidden: true, export: true },
-                                    { title: 'Motibu di petishon', field: 'reason', hidden: true, export: true },
-                                    { title: 'Por fabor amplia bo motibu di petishon', field: 'otherReason', hidden: true, export: true },
-                                    { title: 'Último bia ku bo a traha tabata pa kua persona òf kompania?', field: 'lastWork', hidden: true, export: true },
-                                    { title: 'Nòmber di kompania', field: 'lastEmployerCompanyName', hidden: true, export: true },
-                                    { title: 'Nòmber i fam di èks dunadó di trabou', field: 'lastEmployerName', hidden: true, export: true },
-                                    { title: 'Adrès di e último lugá di trabou', field: 'lastEmployerAddress', hidden: true, export: true },
-                                    { title: 'Ki tipo di trabou bo a traha último biaha?', field: 'lastEmployerWorkType', hidden: true, export: true },
-                                    { title: 'Kuantu tempu pasá esaki tabata?', field: 'lastEmployerTimeAgo', hidden: true, export: true },
-                                    { title: 'Si bo tin mas ku 1 aña ku bo a pèrdè bo trabou, ‘upload’ bo deklarashon di entrada.', field: 'proofOfIncomeLastEmployer', hidden: true, export: true },
-                                    { title: 'Kuantu sèn bo tabata gana na bo último trabou?', field: 'lastEmployerSalary', hidden: true, export: true },
-                                    { title: 'Ku ki frekuensia bo ta risibí e sèn aki?', field: 'lastEmployerPayFrequency', hidden: true, export: true },
-                                    { title: 'Bo ta buska trabou aktivamente?', field: 'activelyJobSeeking', hidden: true, export: true },
-                                    { title: 'Kon bo ta solisitá?', field: 'jobSeekingMethod', hidden: true, export: true },
-                                    { title: 'Karta(nan) di solisitut', field: 'proofOfJobSeeking', hidden: true, export: true },
-                                    { title: 'Dikon nò?', field: 'reasonNoJobSeeking', hidden: true, export: true },
-                                    { title: 'Kontrakt', field: 'hasContract', hidden: true, export: true },
-                                    { title: 'Prueba di Kontrakt', field: 'proofOfContract', hidden: true, export: true },
-                                    { title: 'Bo tin vehíkulo?', field: 'hasVehicle', hidden: true, export: true },
-                                    { title: 'Kiko ta e tipo di vehíkulo', field: 'vehicle', hidden: true, export: true },
-                                    { title: 'Kiko ta e plachi number', field: 'numberPlate', hidden: true, export: true },
-                                    { title: 'Bo tin boto', field: 'hasBoat', hidden: true, export: true },
-                                    { title: 'Kiko ta su datos di registrashon?', field: 'boatInformation', hidden: true, export: true },
-                                    { title: 'Bo tin kas ta hür', field: 'hasRentedHouse', hidden: true, export: true },
-                                    { title: 'Kuantu esaki ta generá pa luna?', field: 'rentalMonthlyPrice', hidden: true, export: true },
-                                    { title: 'Bo tin kuenta di banko?', field: 'hasBankAccount', hidden: true, export: true },
-                                    { title: 'Ki tipo di kuenta di banko bo tin?', field: 'bankAccountType', hidden: true, export: true },
-                                    { title: 'Kuenta koriente di bo banko', field: 'currentAccountStatements', hidden: true, export: true },
-                                    { title: 'Kuenta di spar di bo banko', field: 'savingsAccountStatements', hidden: true, export: true },
-                                    { title: 'Bo tin mas fuente di entrada?', field: 'hasMoreSourceOfIncome', hidden: true, export: true },
-                                    { title: 'Por fabor spesifiká esaki', field: 'moreSourceOfIncome', hidden: true, export: true },
-                                    { title: 'Bo ta biba den bo mes kas?', field: 'hasOwnHouse', hidden: true, export: true },
-                                    { title: 'Kas no propio', field: 'notOwnHouse', hidden: true, export: true },
-                                    { title: 'Adrès', field: 'houseAddress', hidden: true, export: true },
-                                    { title: 'Bo ta paga hipotek?', field: 'payingMortgage', hidden: true, export: true },
-                                    { title: 'Dikon nò?', field: 'reasonNotPayingMortgage', hidden: true, export: true },
-                                    { title: 'Kuantu bo ta paga pa luna na hipotek?', field: 'houseMortgageDebt', hidden: true, export: true },
-                                    { title: 'Kuantu sèn bo ta paga na hür?', field: 'houseRentalPrice', hidden: true, export: true },
-                                    { title: 'Kiko ta bo kontribushon pa luna aki?', field: 'houseContribution', hidden: true, export: true },
-                                    { title: 'Por fabor spesifiká na unda bo ta kedando', field: 'liveInDescription', hidden: true, export: true },
-                                    { title: 'Ken mas ta biba den kas kubo?', field: 'houseResidents', hidden: true, export: true },
-                                    { title: 'kòntrakt di hur of apoderashon', field: 'proofOfRentalContract', hidden: true, export: true },
-                                    { title: 'prueba di pago', field: 'proofOfRentalPayment', hidden: true, export: true },
-                                    { title: 'Otro', field: 'otherHousing', hidden: true, export: true },
-                                    { title: 'Tin mas persona ta depende di bo finansieramente?', field: 'hasDependents', hidden: true, export: true },
-                                    { title: 'Bo ta inskribí na FKP pa bo risibí un kas?', field: 'hasSignupFkp', hidden: true, export: true },
-                                    { title: 'For di ki aña?', field: 'signupFkpYear', hidden: true, export: true },
-                                    { title: 'Kuantu punto bo tin di spar?', field: 'fkpPoints', hidden: true, export: true },
-                                    { title: 'Tin mas persona ta depende di bo finansieramente?', field: 'dependents', hidden: true, export: true },
-                                    { title: 'Kua ta e nivel di skol mas haltu ku bo a kaba?', field: 'education', hidden: true, export: true },
-                                    { title: 'Bo tin diploma?', field: 'hasCertificate', hidden: true, export: true },
-                                    { title: 'Na ki aña bo a risibí e diploma?', field: 'certificateYear', hidden: true, export: true },
-                                    { title: 'hasOtherCertificate', field: 'hasOtherCertificate', hidden: true, export: true },
-                                    { title: 'Por fabor indiká sertifikado di kua kurso/workshòp', field: 'otherCertificateDescription', hidden: true, export: true },
-                                    { title: 'Na ki aña bo a risibí e sertifikado?', field: 'otherCertificateYear', hidden: true, export: true },
-                                    { title: 'Bo a yega di traha den e sektor ku bo a studia aden?', field: 'hasCertificateWorkExperience', hidden: true, export: true },
-                                    { title: 'Na kua kompania?', field: 'certificateWorkExperienceCompany', hidden: true, export: true },
-                                    { title: 'Kon bo mobilidat ta?', field: 'mobility', hidden: true, export: true },
-                                    { title: 'Kon bo bista ta?', field: 'visibility', hidden: true, export: true },
-                                    { title: 'Kon bo oidu ta?', field: 'hearing', hidden: true, export: true },
-                                    { title: 'Kon bo abla ta?', field: 'speakingAbility', hidden: true, export: true },
-                                    { title: 'Bo ta sufri di un òf mas adikshon?', field: 'hasAdiction', hidden: true, export: true },
-                                    { title: 'Bo ta hañando yudansa di un instansia?', field: 'hasAdictionTreatment', hidden: true, export: true },
-                                    { title: 'Por fabor indiká kua instansia', field: 'adictionTreatmentCenter', hidden: true, export: true },
-                                    { title: 'Bo ta sufri di algun malesa', field: 'hasDiseases', hidden: true, export: true },
-                                    { title: 'malesa', field: 'diseases', hidden: true, export: true },
-                                    { title: 'Dor di bo limitashon bo ta hasi huzo di', field: 'equipments', hidden: true, export: true },
-                                    { title: 'Kua instansia ta guia bo den esaki?', field: 'treatmentCenters', hidden: true, export: true },
-                                    { title: 'Otro instansia', field: 'otherTreatmentCenter', hidden: true, export: true },
-                                    { title: 'Bo tin problema sígiko?', field: 'hasPsychologicalLimitation', hidden: true, export: true },
-                                    { title: 'Bo ta haña yudansa di un instansia?', field: 'hasPsychologicalLimitationTreatment', hidden: true, export: true },
-                                    { title: 'Por fabor indiká kua instansia?', field: 'psychologicalLimitationCenter', hidden: true, export: true },
-                                    { title: 'Tin un diagnóstiko?', field: 'hasPsychologicalLimitationDiagnostic', hidden: true, export: true },
-                                    { title: 'Ken a hasi e diagnóstiko aki?', field: 'psychologicalLimitationDiagnostician', hidden: true, export: true },
-                                    { title: 'echa di diagnóstiko', field: 'psychologicalLimitationDiagnosticDate', hidden: true, export: true },
-                                    { title: 'Tin un rapòrt di e diagnóstiko?', field: 'hasPsychologicalLimitationDiagnosticReport', hidden: true, export: true },
-                                    { title: 'Karta di diagnóstiko di bo médiko', field: 'proofOfPsychologicalLimitationDiagnosticReport', hidden: true, export: true },
-                                    { title: 'Bo tin retardashon mental ?', field: 'hasMentalDisorder', hidden: true, export: true },
-                                    { title: 'Bo ta haña yudansa di un instansia?', field: 'hasMentalDisorderTreatment', hidden: true, export: true },
-                                    { title: 'Tin un diagnóstiko?', field: 'hasMentalDisorderDiagnostic', hidden: true, export: true },
-                                    { title: 'Ken a hasi e diagnóstiko aki?', field: 'mentalDisorderDiagnostician', hidden: true, export: true },
-                                    { title: 'Por fabor indiká kua instansia?', field: 'mentalDisorderTreatmentCenter', hidden: true, export: true },
-                                    { title: 'Fecha di diagnóstiko', field: 'mentalDisorderDiagnosticDate', hidden: true, export: true },
-                                    { title: 'Tin un rapòrt di e diagnóstiko?', field: 'hasMentalDisorderDiagnosticReport', hidden: true, export: true },
-                                    { title: 'Karta di diagnóstiko di bo médiko', field: 'proofOfMentalDisorderDiagnosticReport', hidden: true, export: true },
-                                    { title: 'Bo tin yu ku limitashon mental?', field: 'hasPsychologicalLimitationChild', hidden: true, export: true },
-                                    { title: 'Ki tipo di seguro bo tin?', field: 'insurance', hidden: true, export: true },
-                                    { title: 'Bo ta bou di tratamentu di un médiko òf paramédiko?', field: 'hasMedicalTreatment', hidden: true, export: true },
-                                    { title: 'Ki tipo di médiko òf paramédiko?', field: 'medicalTreatment', hidden: true, export: true },
-                                    { title: 'Ki ta e nòmber di e médiko òf paramédiko?', field: 'medicalPractitionerName', hidden: true, export: true },
-                                    { title: 'Karta di bo specialista', field: 'proofOfMedicalTreatment', hidden: true, export: true },
-                                    { title: 'Bo ta usa medikamentu?', field: 'useMedicalSupplies', hidden: true, export: true },
-                                    { title: 'Ki tipo di medikamentu?', field: 'medicalSupplies', hidden: true, export: true },
-                                    { title: 'Bo ta risibí yudansa sosial pa motibu di bo estado di salú?gender', field: 'hasWelfare', hidden: true, export: true },
-                                    { title: 'Ki tipo di yudansa?', field: 'welfare', hidden: true, export: true },
-                                    { title: 'Bo tin seguro di entiero?', field: 'hasFuneralInsurance', hidden: true, export: true },
-                                    { title: 'Por fabor indiká na kua kompania', field: 'funeralInsurance', hidden: true, export: true },
-                                    { title: 'Fecha di petishon', field: 'created', export: true, render: rowData => rowData.created.slice(0, 10) },
-                                ]
-                                }
-                                data={
-                                    query => new Promise((resolve, reject) => {
-                                        setError(false);
-                                        let pagination = null;
-                                        //setLoading(true);
-                                        fetch(`${process.env.REACT_APP_API}/api/request?type=${type}&pageSize=${query.pageSize}&page=${query.page + 1}${query.search && `&search=${query.search}`}`)
-                                            .then(response => {
-                                                pagination = JSON.parse(response.headers.get('X-Pagination'))
-                                                return response.json()
-                                            })
-                                            .then(result => {
-                                                //setLoading(
-                                                resolve({
-                                                    data: result,
-                                                    page: pagination.CurrentPage - 1,
-                                                    totalCount: pagination.TotalCount
-                                                })
-                                            }).catch(err => {
-                                                //setLoading(false);
-                                                setError(true);
-                                                setErrorMessage(err)
-                                            })
 
-                                    })
-                                }
-                                detailPanel={data => {
-                                    return <Request id={data.rowData.id} />
-                                }}
-                                options={{
-                                    exportButton: true,
-                                    search: true
-                                }}
-                                components={{
-                                    Action: props => (
-                                        <div style={{
-                                            margin: '10px 10px 10px 2px',
-                                            display: 'inline-flex',
-                                            width: "150px"
-                                        }}>
-                                            <Select
-                                                labelId="typelbl"
-                                                id="typeSelect"
-                                                value={type}
-                                                onChange={(event) => {
-                                                    setType(event.target.value);
-                                                    props.action.onClick()
-                                                }}
-                                            >
-                                                <MenuItem value={0}>
-                                                    <em>Select Type</em>
-                                                </MenuItem>
-                                                <MenuItem value={1}>Onderstant</MenuItem>
-                                                <MenuItem value={2}>Voedselpakket</MenuItem>
-                                                <MenuItem value={3}>Karchi sosial</MenuItem>
-                                            </Select>
-                                        </div>
-                                    )
-                                }}
-                                actions={[
-                                    {
-                                        onClick: () => tableRef.current && tableRef.current.onQueryChange(),
-                                        isFreeAction: true
-                                        // onClick: (event, rowData) => alert("You saved " + rowData.name),
-                                    }
-                                ]}
-                            />
-                        </Grid>
-                    </>
-                )}
-            </Grid>
-        </div>
+        <Grid item xs={12}>
+            <DataGrid
+                className={classes.root}
+                autoHeight
+                columns={[
+                    { headerName: 'Fam', field: 'lastName' },
+                    { headerName: 'Nomber', field: 'firstName' },
+                    { headerName: 'Adrès kaminda ta registrá ofisialmente na Kranshi', field: 'registeredAddress' },
+                    { headerName: 'Number di adrès na Kranshi', field: 'registeredAddressNumber' },
+                    { headerName: 'Adrès kaminda bo ta biba aktualmente', field: 'currentAddress', hideable: true, export: true },
+                    { headerName: 'Number di adrès aktual', field: 'currentAddressNumber', hideable: true, export: true },
+                    { headerName: 'Pais di nasementu', field: 'placeOfBirth' },
+                    { headerName: 'Number di identifikashon', field: 'identificationNumber' },
+                    { headerName: 'Status', field: 'status', export: true },
+                    { headerName: 'Nashonalidat Hulandes', field: 'hasDutchNationality', hideable: true, export: true, valueGetter: params => params.row.hasDutchNationality ? "Sí" : "Nó" },
+                    { headerName: 'Prueba di Residensia', field: 'proofOfResident', hideable: true, export: true },
+                    { headerName: 'Prueba di ID', field: 'proofOfID', hideable: true, export: true },
+                    { headerName: 'Fecha di nasementu', field: 'dateOfBirth', hideable: true, export: true },
+                    { headerName: 'Sekso', field: 'gender', hideable: true, export: true },
+                    { headerName: 'Estado sivil', field: 'maritalStatus', hideable: true, export: true },
+                    { headerName: 'Number di telefòn di selular', field: 'phone1', hideable: true, export: true },
+                    { headerName: 'Number di telefòn di kas', field: 'phone2', hideable: true, export: true },
+                    { headerName: 'Number di telefòn di whatsapp', field: 'whatsapp', hideable: true, export: true },
+                    { headerName: 'E-mail', field: 'email', hideable: true, export: true },
+                    { headerName: 'Ki tipo di identifikashon lo bo bai usa, pa identifiká bo mes na kas di bario?', field: 'identificationType', hideable: true, export: true },
+                    { headerName: 'Fecha di vensementu', field: 'expiryDate', hideable: true, export: true },
+                    { headerName: 'Fam di pareha', field: 'firstNamePartner', hideable: true, export: true },
+                    { headerName: 'Nòmber di pareha', field: 'lastNamePartner', hideable: true, export: true },
+                    { headerName: 'Number di identifikashon riba sédula di pareha', field: 'identificationNumberPartner', hideable: true, export: true },
+                    { headerName: 'Prueba di entrada di bo pareha', field: 'proofOfPartnerIncome', hideable: true, export: true },
+                    { headerName: 'Prueba di matrimonio', field: 'proofOfMarriage', hideable: true, export: true },
+                    { headerName: 'Prueba di divorsio', field: 'proofOfDivorce', hideable: true, export: true },
+                    { headerName: 'Prueba di e veredicto', field: 'proofOfVerdict', hideable: true, export: true },
+                    { headerName: 'Prueba di fayesementu di bo kasá', field: 'proofOfDeath', hideable: true, export: true },
+                    { headerName: 'Bo ta den un relashon aktualmente?', field: 'hasRelationship', hideable: true, export: true, valueGetter: params => params.row.hasRelationship ? "Sí" : "Nó" },
+                    { headerName: 'Bo ta biba huntu ku bo pareha?', field: 'livingTogether', hideable: true, export: true },
+                    { headerName: 'Na kua adrès boso ta biba?', field: 'livingTogetherAddress', hideable: true, export: true },
+                    { headerName: 'Na kua number di adrès boso ta biba?', field: 'livingTogetherAddressNumber', hideable: true, export: true },
+                    { headerName: 'Bo tin yu?', field: 'hasChildren', hideable: true, export: true, valueGetter: params => params.row.hasChildren ? "Sí" : "Nó" },
+                    { headerName: 'Akto di nasementu di bo yu(nan)/buki di famia', field: 'proofOfChildren', hideable: true, export: true },
+                    { headerName: 'Propio yu', field: 'ownChildren', hideable: true, export: true },
+                    { headerName: 'Yu di kriansa', field: 'notOwnChildren', hideable: true, export: true },
+                    { headerName: 'Bo tin entrada aktualmente?', field: 'hasIncome', hideable: true, export: true, valueGetter: params => params.row.hasIncome ? "Sí" : "Nó" },
+                    { headerName: 'Kon bo a yega na e entrada aki ?', field: 'work', hideable: true, export: true },
+                    { headerName: 'Mi ta kue djòp', field: 'contractee', hideable: true, export: true },
+                    { headerName: 'Nòmber di kompania', field: 'employerCompanyName', hideable: true, export: true },
+                    { headerName: 'Nòmber i fam di e persona  dunadó di trabou', field: 'employerName', hideable: true, export: true },
+                    { headerName: 'Adrès di e trabou', field: 'employerAddress', hideable: true, export: true },
+                    { headerName: 'Tipo di trabou/job bo ta hasi', field: 'employerJobType', hideable: true, export: true },
+                    { headerName: 'Kuantu sèn bo tabata risibí pa bo trabou?', field: 'employerSalary', hideable: true, export: true },
+                    { headerName: 'Ku ki frekuensia bo ta risibí e sèn aki?', field: 'employerPayFrequency', hideable: true, export: true },
+                    { headerName: 'Kiko ta e motibu ku bo no por traha?', field: 'reasonCannotWork', hideable: true, export: true },
+                    { headerName: 'Prueba ku bo no por traha', field: 'proofOfCannotWork', hideable: true, export: true },
+                    { headerName: 'Motibu di petishon', field: 'reason', hideable: true, export: true },
+                    { headerName: 'Por fabor amplia bo motibu di petishon', field: 'otherReason', hideable: true, export: true },
+                    { headerName: 'Último bia ku bo a traha tabata pa kua persona òf kompania?', field: 'lastWork', hideable: true, export: true },
+                    { headerName: 'Nòmber di kompania', field: 'lastEmployerCompanyName', hideable: true, export: true },
+                    { headerName: 'Nòmber i fam di èks dunadó di trabou', field: 'lastEmployerName', hideable: true, export: true },
+                    { headerName: 'Adrès di e último lugá di trabou', field: 'lastEmployerAddress', hideable: true, export: true },
+                    { headerName: 'Ki tipo di trabou bo a traha último biaha?', field: 'lastEmployerWorkType', hideable: true, export: true },
+                    { headerName: 'Kuantu tempu pasá esaki tabata?', field: 'lastEmployerTimeAgo', hideable: true, export: true },
+                    { headerName: 'Si bo tin mas ku 1 aña ku bo a pèrdè bo trabou, ‘upload’ bo deklarashon di entrada.', field: 'proofOfIncomeLastEmployer', hideable: true, export: true },
+                    { headerName: 'Kuantu sèn bo tabata gana na bo último trabou?', field: 'lastEmployerSalary', hideable: true, export: true },
+                    { headerName: 'Ku ki frekuensia bo ta risibí e sèn aki?', field: 'lastEmployerPayFrequency', hideable: true, export: true },
+                    { headerName: 'Bo ta buska trabou aktivamente?', field: 'activelyJobSeeking', hideable: true, export: true },
+                    { headerName: 'Kon bo ta solisitá?', field: 'jobSeekingMethod', hideable: true, export: true },
+                    { headerName: 'Karta(nan) di solisitut', field: 'proofOfJobSeeking', hideable: true, export: true },
+                    { headerName: 'Dikon nò?', field: 'reasonNoJobSeeking', hideable: true, export: true },
+                    { headerName: 'Kontrakt', field: 'hasContract', hideable: true, export: true, valueGetter: params => params.row.hasContract ? "Sí" : "Nó" },
+                    { headerName: 'Prueba di Kontrakt', field: 'proofOfContract', hideable: true, export: true },
+                    { headerName: 'Bo tin vehíkulo?', field: 'hasVehicle', hideable: true, export: true, valueGetter: params => params.row.hasVehicle ? "Sí" : "Nó" },
+                    { headerName: 'Kiko ta e tipo di vehíkulo', field: 'vehicle', hideable: true, export: true },
+                    { headerName: 'Kiko ta e plachi number', field: 'numberPlate', hideable: true, export: true },
+                    { headerName: 'Bo tin boto', field: 'hasBoat', hideable: true, export: true, valueGetter: params => params.row.hasBoat ? "Sí" : "Nó" },
+                    { headerName: 'Kiko ta su datos di registrashon?', field: 'boatInformation', hideable: true, export: true },
+                    { headerName: 'Bo tin kas ta hür', field: 'hasRentedHouse', hideable: true, export: true, valueGetter: params => params.row.hasRentedHouse ? "Sí" : "Nó" },
+                    { headerName: 'Kuantu esaki ta generá pa luna?', field: 'rentalMonthlyPrice', hideable: true, export: true },
+                    { headerName: 'Bo tin kuenta di banko?', field: 'hasBankAccount', hideable: true, export: true, valueGetter: params => params.row.hasBankAccount ? "Sí" : "Nó" },
+                    { headerName: 'Ki tipo di kuenta di banko bo tin?', field: 'bankAccountType', hideable: true, export: true },
+                    { headerName: 'Kuenta koriente di bo banko', field: 'currentAccountStatements', hideable: true, export: true },
+                    { headerName: 'Kuenta di spar di bo banko', field: 'savingsAccountStatements', hideable: true, export: true },
+                    { headerName: 'Bo tin mas fuente di entrada?', field: 'hasMoreSourceOfIncome', hideable: true, export: true, valueGetter: params => params.row.hasMoreSourceOfIncome ? "Sí" : "Nó" },
+                    { headerName: 'Por fabor spesifiká esaki', field: 'moreSourceOfIncome', hideable: true, export: true },
+                    { headerName: 'Bo ta biba den bo mes kas?', field: 'hasOwnHouse', hideable: true, export: true, valueGetter: params => params.row.hasOwnHouse ? "Sí" : "Nó" },
+                    { headerName: 'Kas no propio', field: 'notOwnHouse', hideable: true, export: true },
+                    { headerName: 'Adrès', field: 'houseAddress', hideable: true, export: true },
+                    { headerName: 'Bo ta paga hipotek?', field: 'payingMortgage', hideable: true, export: true },
+                    { headerName: 'Dikon nò?', field: 'reasonNotPayingMortgage', hideable: true, export: true },
+                    { headerName: 'Kuantu bo ta paga pa luna na hipotek?', field: 'houseMortgageDebt', hideable: true, export: true },
+                    { headerName: 'Kuantu sèn bo ta paga na hür?', field: 'houseRentalPrice', hideable: true, export: true },
+                    { headerName: 'Kiko ta bo kontribushon pa luna aki?', field: 'houseContribution', hideable: true, export: true },
+                    { headerName: 'Por fabor spesifiká na unda bo ta kedando', field: 'liveInDescription', hideable: true, export: true },
+                    { headerName: 'Ken mas ta biba den kas kubo?', field: 'houseResidents', hideable: true, export: true },
+                    { headerName: 'kòntrakt di hur of apoderashon', field: 'proofOfRentalContract', hideable: true, export: true },
+                    { headerName: 'prueba di pago', field: 'proofOfRentalPayment', hideable: true, export: true },
+                    { headerName: 'Otro', field: 'otherHousing', hideable: true, export: true },
+                    { headerName: 'Tin mas persona ta depende di bo finansieramente?', field: 'hasDependents', hideable: true, export: true, valueGetter: params => params.row.hasDependents ? "Sí" : "Nó" },
+                    { headerName: 'Bo ta inskribí na FKP pa bo risibí un kas?', field: 'hasSignupFkp', hideable: true, export: true, valueGetter: params => params.row.hasSignupFkp ? "Sí" : "Nó" },
+                    { headerName: 'For di ki aña?', field: 'signupFkpYear', hideable: true, export: true },
+                    { headerName: 'Kuantu punto bo tin di spar?', field: 'fkpPoints', hideable: true, export: true },
+                    { headerName: 'Tin mas persona ta depende di bo finansieramente?', field: 'dependents', hideable: true, export: true },
+                    { headerName: 'Kua ta e nivel di skol mas haltu ku bo a kaba?', field: 'education', hideable: true, export: true },
+                    { headerName: 'Bo tin diploma?', field: 'hasCertificate', hideable: true, export: true, valueGetter: params => params.row.hasCertificate ? "Sí" : "Nó" },
+                    { headerName: 'Na ki aña bo a risibí e diploma?', field: 'certificateYear', hideable: true, export: true },
+                    { headerName: 'hasOtherCertificate', field: 'hasOtherCertificate', hideable: true, export: true, valueGetter: params => params.row.hasOtherCertificate ? "Sí" : "Nó" },
+                    { headerName: 'Por fabor indiká sertifikado di kua kurso/workshòp', field: 'otherCertificateDescription', hideable: true, export: true },
+                    { headerName: 'Na ki aña bo a risibí e sertifikado?', field: 'otherCertificateYear', hideable: true, export: true },
+                    { headerName: 'Bo a yega di traha den e sektor ku bo a studia aden?', field: 'hasCertificateWorkExperience', hideable: true, export: true, valueGetter: params => params.row.hasCertificateWorkExperience ? "Sí" : "Nó" },
+                    { headerName: 'Na kua kompania?', field: 'certificateWorkExperienceCompany', hideable: true, export: true },
+                    { headerName: 'Kon bo mobilidat ta?', field: 'mobility', hideable: true, export: true },
+                    { headerName: 'Kon bo bista ta?', field: 'visibility', hideable: true, export: true },
+                    { headerName: 'Kon bo oidu ta?', field: 'hearing', hideable: true, export: true },
+                    { headerName: 'Kon bo abla ta?', field: 'speakingAbility', hideable: true, export: true },
+                    { headerName: 'Bo ta sufri di un òf mas adikshon?', field: 'hasAdiction', hideable: true, export: true, valueGetter: params => params.row.hasAdiction ? "Sí" : "Nó" },
+                    { headerName: 'Bo ta hañando yudansa di un instansia?', field: 'hasAdictionTreatment', hideable: true, export: true, valueGetter: params => params.row.hasAdictionTreatment ? "Sí" : "Nó" },
+                    { headerName: 'Por fabor indiká kua instansia', field: 'adictionTreatmentCenter', hideable: true, export: true },
+                    { headerName: 'Bo ta sufri di algun malesa', field: 'hasDiseases', hideable: true, export: true, valueGetter: params => params.row.hasDiseases ? "Sí" : "Nó" },
+                    { headerName: 'malesa', field: 'diseases', hideable: true, export: true },
+                    { headerName: 'Dor di bo limitashon bo ta hasi huzo di', field: 'equipments', hideable: true, export: true },
+                    { headerName: 'Kua instansia ta guia bo den esaki?', field: 'treatmentCenters', hideable: true, export: true },
+                    { headerName: 'Otro instansia', field: 'otherTreatmentCenter', hideable: true, export: true },
+                    { headerName: 'Bo tin problema sígiko?', field: 'hasPsychologicalLimitation', hideable: true, export: true, valueGetter: params => params.row.hasPsychologicalLimitation ? "Sí" : "Nó" },
+                    { headerName: 'Bo ta haña yudansa di un instansia?', field: 'hasPsychologicalLimitationTreatment', hideable: true, export: true, valueGetter: params => params.row.hasPsychologicalLimitationTreatment ? "Sí" : "Nó" },
+                    { headerName: 'Por fabor indiká kua instansia?', field: 'psychologicalLimitationCenter', hideable: true, export: true },
+                    { headerName: 'Tin un diagnóstiko?', field: 'hasPsychologicalLimitationDiagnostic', hideable: true, export: true, valueGetter: params => params.row.hasDutchNationality ? "Sí" : "Nó" },
+                    { headerName: 'Ken a hasi e diagnóstiko aki?', field: 'psychologicalLimitationDiagnostician', hideable: true, export: true },
+                    { headerName: 'echa di diagnóstiko', field: 'psychologicalLimitationDiagnosticDate', hideable: true, export: true },
+                    { headerName: 'Tin un rapòrt di e diagnóstiko?', field: 'hasPsychologicalLimitationDiagnosticReport', hideable: true, export: true, valueGetter: params => params.row.hasPsychologicalLimitationDiagnosticReport ? "Sí" : "Nó" },
+                    { headerName: 'Karta di diagnóstiko di bo médiko', field: 'proofOfPsychologicalLimitationDiagnosticReport', hideable: true, export: true },
+                    { headerName: 'Bo tin retardashon mental ?', field: 'hasMentalDisorder', hideable: true, export: true, valueGetter: params => params.row.hasMentalDisorder ? "Sí" : "Nó" },
+                    { headerName: 'Bo ta haña yudansa di un instansia?', field: 'hasMentalDisorderTreatment', hideable: true, export: true, valueGetter: params => params.row.hasMentalDisorderTreatment ? "Sí" : "Nó" },
+                    { headerName: 'Tin un diagnóstiko?', field: 'hasMentalDisorderDiagnostic', hideable: true, export: true, valueGetter: params => params.row.hasMentalDisorderDiagnostic ? "Sí" : "Nó" },
+                    { headerName: 'Ken a hasi e diagnóstiko aki?', field: 'mentalDisorderDiagnostician', hideable: true, export: true },
+                    { headerName: 'Por fabor indiká kua instansia?', field: 'mentalDisorderTreatmentCenter', hideable: true, export: true },
+                    { headerName: 'Fecha di diagnóstiko', field: 'mentalDisorderDiagnosticDate', hideable: true, export: true },
+                    { headerName: 'Tin un rapòrt di e diagnóstiko?', field: 'hasMentalDisorderDiagnosticReport', hideable: true, export: true, valueGetter: params => params.row.hasDuthasMentalDisorderDiagnosticReportchNationality ? "Sí" : "Nó" },
+                    { headerName: 'Karta di diagnóstiko di bo médiko', field: 'proofOfMentalDisorderDiagnosticReport', hideable: true, export: true },
+                    { headerName: 'Bo tin yu ku limitashon mental?', field: 'hasPsychologicalLimitationChild', hideable: true, export: true, valueGetter: params => params.row.hasPsychologicalLimitationChild ? "Sí" : "Nó" },
+                    { headerName: 'Ki tipo di seguro bo tin?', field: 'insurance', hideable: true, export: true },
+                    { headerName: 'Bo ta bou di tratamentu di un médiko òf paramédiko?', field: 'hasMedicalTreatment', hideable: true, export: true, valueGetter: params => params.row.hasMedicalTreatment ? "Sí" : "Nó" },
+                    { headerName: 'Ki tipo di médiko òf paramédiko?', field: 'medicalTreatment', hideable: true, export: true },
+                    { headerName: 'Ki ta e nòmber di e médiko òf paramédiko?', field: 'medicalPractitionerName', hideable: true, export: true },
+                    { headerName: 'Karta di bo specialista', field: 'proofOfMedicalTreatment', hideable: true, export: true },
+                    { headerName: 'Bo ta usa medikamentu?', field: 'useMedicalSupplies', hideable: true, export: true },
+                    { headerName: 'Ki tipo di medikamentu?', field: 'medicalSupplies', hideable: true, export: true },
+                    { headerName: 'Bo ta risibí yudansa sosial pa motibu di bo estado di salú?gender', field: 'hasWelfare', hideable: true, export: true, valueGetter: params => params.row.hasWelfare ? "Sí" : "Nó" },
+                    { headerName: 'Ki tipo di yudansa?', field: 'welfare', hideable: true, export: true },
+                    { headerName: 'Bo tin seguro di entiero?', field: 'hasFuneralInsurance', hideable: true, export: true, valueGetter: params => params.row.hasFuneralInsurance ? "Sí" : "Nó" },
+                    { headerName: 'Por fabor indiká na kua kompania', field: 'funeralInsurance', hideable: true, export: true },
+                    { headerName: 'Fecha di petishon', field: 'created', export: true, valueGetter: params => (format(new Date(params.row.created), 'dd-MM-yyyy')), minWidth: 100, flex: 1 },
+                    { headerName: 'Kambio di petishon', field: 'updated', export: true, valueGetter: params => (format(new Date(params.row.updated), 'dd-MM-yyyy')), minWidth: 100, flex: 1 },
+                ]
+                }
+                loading={loading}
+                // error={error}
+                components={{ Toolbar: GridToolbar }}
+                componentsProps={{
+                    toolbar: {
+                        showQuickFilter: true,
+                        quickFilterProps: { debounceMs: 500 },
+                    },
+                }}
+                disableColumnFilter
+                disableDensitySelector
+                hideFooterSelectedRowCount
+                pagination
+                paginationMode="server"
+                rowCount={requests.count}
+                page={requests.page}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
+                onPageChange={(page) => setPage(page)}
+                filterMode="server"
+                onFilterModelChange={onFilterChange}
+                rows={requests.items}
+            />
+        </Grid>
     )
 }
 

@@ -1,47 +1,48 @@
 import React from "react";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import { Select, MenuItem } from "@mui/material";
 import { Controller } from "react-hook-form";
 
 
-const StatusSelect = ({ label, control, required, error }) => {
+const StatusSelect = ({ name, label, control, required, error }) => {
     return (
         <Controller
-            render={props => (
-                <Autocomplete
-                    {...props}
-                    options={statusList}
-                    getOptionLabel={option => option.label}
-                    getOptionSelected={(option, value) => {
-                        return option.value === value.value
-                    }}
-                    renderInput={params => (
-                        <TextField
-                            {...params}
-                            label={label}
-                            variant="outlined"
-                            required={required}
-                            error={error}
-                        />
-                    )}
-                    onChange={(_, data) => {
-                        return props.onChange(data)
-                    }}
-                />
-            )}
-            name="maritalStatus"
             control={control}
+            name={name}
+            render={({ field }) => (
+                <Select
+                    {...field}
+
+                    fullWidth
+                    label={label}
+                    variant="outlined"
+                    required={required}
+                    error={error}
+
+                >
+                    {statusList.map((status, index) => (<MenuItem key={index} value={status.value}>{status.label}</MenuItem>))}
+                </Select>
+            )}
+
         />
     );
 }
 
-
-
 const statusList = [
-    { value: "single", label: 'Soltero' },
-    { value: "marriedOrPartnership", label: "Kasá of bibá" },
-    { value: "divorced", label: "Divorsiá" },
-    { value: "widow", label: "Viuda/o" }
+    { value: "ongehuwd", label: 'No ta kasá òf tin un konbibensia legalisá di pareha' },
+    { value: "gehuwd", label: 'Kasá' },
+    { value: "geregistreerd partnerschap", label: 'Konbibensia legalisá di pareha' },
+    { value: "gescheiden", label: 'Divorsiá' },
+    { value: "gescheiden partnerschap", label: 'Divorsiá for di konbibensia legalisá di pareha' },
+    { value: "weduwe", label: 'Viuda/o' },
 ]
+
+// const statusList = [
+//     { value: "single", label: 'No ta kasá òf tin un konbibensia legalisá di pareha' },
+//     { value: "married", label: "Kasá" },
+//     { value: "registeredPartnership", label: "Konbibensia legalisá di pareha" },
+//     { value: "divorced", label: "Divorsiá" },
+//     { value: "divorcedPartnership", label: "Divorsiá for di konbibensia legalisá di pareha" },
+//     { value: "widow", label: "Viuda/o" }
+// ]
 
 export default StatusSelect;

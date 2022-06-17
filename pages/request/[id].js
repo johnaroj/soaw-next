@@ -1,9 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@mui/styles';
+import { Grid } from '@mui/material';
 import { SectionAlternate, CardBase } from '@/components/organisms';
-import Hero from '@/components/RequestStatus/Hero';
-import General from '@/components/RequestStatus/General';
-import { validateAuth } from '@/utils/auth';
+import Hero from '@/components/RequestDetails/Hero'
+import General from '@/components/RequestDetails/General'
+import Main from '@/layouts/Main';
+import { getSession } from 'next-auth/react';
+import { NEXT_URL } from '@/config/index.js';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -28,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 
 
 
-const RequestStatus = () => {
+const RequestDetails = ({ request }) => {
     const classes = useStyles();
 
     return (
@@ -36,34 +39,39 @@ const RequestStatus = () => {
             <Hero />
             <SectionAlternate className={classes.section}>
                 <CardBase withShadow align="left">
-                    <General />
+                    <General request={request} />
                 </CardBase>
             </SectionAlternate>
         </div>
     );
 };
 
-export default RequestStatus;
-
+export default RequestDetails;
+RequestDetails.getLayout = function getLayout(RequestDetails) {
+    return (
+        <Main>{RequestDetails}</Main>
+    )
+}
 export const getServerSideProps = async ({ req, params }) => {
-    console.log(params)
-    const auth = validateAuth(req);
+    const session = await getSession({ req });
+    if (!session) {
+        return {
+            redirect: {
+                destination: `/signin?redirect=admin/request`,
+                permanent: false
+            }
+        }
+    }
 
-    console.log(auth);
+    const request = await fetch(`${NEXT_URL}/api/request/${params.id}`, {
+        headers: {
+            cookie: req.headers.cookie,
+        }
+    }).then(result => result.json())
 
-    // if (!auth) {
-    //     return {
-    //         redirect: {
-    //             permanent: false,
-    //             destination: `/login?redirect=request/${params.id}`,
-    //         },
-    //     };
-    // }
-    // const data = fetch()
-    // const { data: requestList, isLoading, error, isError } = useQuery('request', async () => {
-    //     const result = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${keycloak.idTokenParsed.sub}`)
-    //     const data = await result.json()
-    //     return data;
-
-    // })
-};
+    return {
+        props: {
+            request
+        }
+    }
+}

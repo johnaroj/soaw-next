@@ -1,6 +1,6 @@
 
 import prisma from '@/config/db'
-import withProtect from 'middlewares/withProtect';
+import withProtect from '@/utils/withProtect';
 
 export const config = {
     api: {
@@ -106,7 +106,7 @@ const handler = async (req, res) => {
 
             res.status(200).json(updatedRequest)
         } catch (error) {
-            console.log(error)
+            console.log(error.message)
             res.status(404).json({ success: false, message: error.message })
         } finally {
             await prisma.$disconnect();

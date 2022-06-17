@@ -8,20 +8,19 @@ const StatusSelect = ({ name, label, control, required, error }) => {
         <Controller
             control={control}
             name={name}
-            render={({ field }) => (
-                <Select
+            render={({ field }) => {
+                return <Select
                     {...field}
-
                     fullWidth
                     label={label}
                     variant="outlined"
                     required={required}
                     error={error}
-
                 >
-                    {statusList.map((status, index) => (<MenuItem key={index} value={status}>{status}</MenuItem>))}
+                    <MenuItem value={""}></MenuItem>
+                    {statusList?.map((status) => (<MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>))}
                 </Select>
-            )}
+            }}
 
         />
     );
@@ -33,8 +32,8 @@ const statusList = [
     { value: "gehuwd", label: "Kasá" },
     { value: "geregistreerd partnerschap", label: "Konbibensia legalisá di pareha" },
     { value: "gescheiden", label: "Divorsiá" },
-    { value: "gescheiden na partnerschap", label: "Divorsiá for di konbibensia legalisá di pareha" },
-    { value: "verweduwd", label: "Viuda/o" }
+    { value: "gescheiden partnerschap", label: "Divorsiá for di konbibensia legalisá di pareha" },
+    { value: "weduwe", label: "Viuda/o" }
 ]
 
 export default StatusSelect;

@@ -1,5 +1,4 @@
 import React, { forwardRef, useState } from 'react';
-import { useKeycloak } from "@react-keycloak/ssr";
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import Link from '@/components/Link'
@@ -20,7 +19,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MenuIcon from '@mui/icons-material/Menu';
 import Image from '@/components/atoms/Image';
 import { useSession } from "next-auth/react"
-import { authorizedFunction } from '@/utils/auth';
+    ;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -171,7 +170,7 @@ const Topbar = props => {
     };
 
     const RequestPages = () => {
-        const { aidForm, resilienceForm, foodstampsForm, status } = request.children;
+        const { aidForm, resilienceForm, foodstampsForm, reapply, status } = request.children;
         return (
             <div className={classes.menu}>
                 <div className={classes.menuItem}>
@@ -179,6 +178,7 @@ const Topbar = props => {
                     {/* <MenuGroup item={foodstampsForm} /> */}
                     {/* <MenuGroup item={resilienceForm} /> */}
                     <MenuGroup item={status} />
+                    <MenuGroup item={reapply} />
                 </div>
             </div>
         );

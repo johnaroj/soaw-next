@@ -24,11 +24,11 @@ import {
 } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { useKeycloak } from '@react-keycloak/ssr';
 import { useMutation, useQuery } from "react-query";
 import { Alert } from '@mui/material/Alert';
 import { useHistory } from 'react-router-dom';
 import DateDropdown from 'components/DateDropdown';
+import { useSession } from 'next-auth/react';
 
 const useStyles = makeStyles(theme => ({
     root: {},
@@ -64,9 +64,9 @@ const useStyles = makeStyles(theme => ({
 const General = props => {
     const { className, ...rest } = props;
     const history = useHistory()
-    const { keycloak } = useKeycloak();
+    const { data: session, status } = useSession()
     const { data: exists, isLoading: isExisitsLoading } = useQuery('exists', async () => {
-        const result = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${keycloak.idTokenParsed.sub}&type=2`)
+        const result = await fetch(`${process.env.REACT_APP_API}/api/request/user?id=${session.user.id}&type=2`)
         const data = await result.json()
         return data;
     })
@@ -174,7 +174,7 @@ const General = props => {
             registeredAddressNumber: '',
             currentAddress: '',
             currentAddressNumber: '',
-            placeOfBirth: 'Curacao',
+            placeOfBirth: 'Curaçao',
             hasDutchNationality: null,
             proofOfResident: [],
             dateOfBirth: null,
@@ -260,7 +260,7 @@ const General = props => {
             images,
             type: 2,
             maritalStatus: data.maritalStatus.value,
-            userId: keycloak.idTokenParsed.sub,
+            userId: session.user.id,
             createdBy: 'internet',
             created: new Date().toISOString().substr(0, 10),
             updatedBy: 'internet',

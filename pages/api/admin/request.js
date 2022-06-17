@@ -1,5 +1,6 @@
 
 import prisma from '@/config/db'
+import { admin } from '@/utils/rolesMiddleware';
 import withProtect from '@/utils/withProtect';
 
 export const config = {
@@ -15,13 +16,6 @@ const handler = async (req, res) => {
         let whereOr = undefined;
         let where = undefined;
 
-        if (req.user?.id) {
-            if (!where) {
-                where = {
-                    userId: req.user.id
-                }
-            }
-        }
         if (req.query.search) {
             if (!whereOr) {
                 whereOr = {
@@ -57,7 +51,6 @@ const handler = async (req, res) => {
                     images: true
                 },
             })
-
             res.status(200).json({ items, page, count, pages: Math.ceil(count / pageSize) })
         } catch (error) {
             res.status(500).json({ success: false, message: error.message })
@@ -236,4 +229,4 @@ const handler = async (req, res) => {
 
 }
 
-export default withProtect(handler)
+export default withProtect(admin(handler))

@@ -11,6 +11,7 @@ import ForumIcon from '@mui/icons-material/Forum';
 import ContactForm from '@/components/ContactForm';
 import Hero from '@/components/Home/Hero';
 import Main from '@/layouts/Main';
+import { useSession } from 'next-auth/react';
 
 
 const useStyles = makeStyles(theme => ({

@@ -5,7 +5,6 @@ import Link from '@/components/Link'
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@mui/styles';
-import { useKeycloak } from "@react-keycloak/ssr";
 import {
     List,
     ListItem,
@@ -14,7 +13,8 @@ import {
     Divider
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { authorizedFunction } from '@/utils/auth';
+;
+import { useSession } from 'next-auth/react';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -67,7 +67,7 @@ const CustomLink = forwardRef((props, ref) => (
 const SidebarNav = props => {
     const { pages, onClose, className, ...rest } = props;
     const classes = useStyles();
-    const { keyCloak } = useKeycloak();
+    const { data: session, status } = useSession();
 
     const admin = pages.admin;
     const request = pages.request;
@@ -95,7 +95,7 @@ const SidebarNav = props => {
     };
 
     const RequestPages = () => {
-        const { aidForm, resilienceForm, foodstampsForm, status } = request.children;
+        const { aidForm, resilienceForm, foodstampsForm, reapply, status } = request.children;
         return (
             <div className={classes.menu}>
                 <div className={classes.menuItem}>
@@ -103,6 +103,7 @@ const SidebarNav = props => {
                     {/* <MenuGroup item={foodstampsForm} /> */}
                     {/* <MenuGroup item={resilienceForm} /> */}
                     <MenuGroup item={status} />
+                    <MenuGroup item={reapply} />
                 </div>
             </div>
         );
@@ -128,7 +129,7 @@ const SidebarNav = props => {
             <div className={classes.menu}>
                 <div className={classes.menuItem}>
                     {
-                        keyCloak.authenticated ?
+                        session ?
                             <MenuGroup item={signout} />
                             :
                             <>

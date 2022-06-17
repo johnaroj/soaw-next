@@ -64,6 +64,10 @@ const Main = props => {
                 status: {
                     title: 'Estado Bijstand',
                     href: '/request/status'
+                },
+                reapply: {
+                    title: 'Aplíka di nobo',
+                    href: '/form/aid?reapply=true'
                 }
             }
 
@@ -93,12 +97,7 @@ const Main = props => {
                 signup: {
                     title: 'Registra',
                     href: '/',
-                    onClick: () => {
-                        if (keycloak) {
-
-                            window.location.href = keycloak.createRegisterUrl()
-                        }
-                    }
+                    //onClick: () => new('keycloak', { callbackUrl: 'http://localhost:3000' })
                 },
                 signin: {
                     title: 'Login',
@@ -108,16 +107,13 @@ const Main = props => {
                 signout: {
                     title: 'Logout',
                     href: '/',
-                    onClick: () => signOut({
-                        callbackUrl: "/api/auth/logout",
-                    })
+                    onClick: () => signOut({ callbackUrl: "/api/auth/logout", })
                 }
             },
         },
     };
 
     const [openSidebar, setOpenSidebar] = useState(false);
-
     const handleSidebarOpen = () => {
         setOpenSidebar(true);
     };

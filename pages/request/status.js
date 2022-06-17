@@ -3,7 +3,10 @@ import { makeStyles } from '@mui/styles';
 import { SectionAlternate, CardBase } from '@/components/organisms';
 import Hero from '@/components/RequestStatus/Hero';
 import General from '@/components/RequestStatus/General';
-import { validateAuth } from '@/utils/auth';
+import { getSession } from 'next-auth/react';
+import { NEXT_URL } from '@/config/index.js';
+import Main from '@/layouts/Main';
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -28,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 
 
 
-const RequestStatus = () => {
+const RequestStatus = ({ requests }) => {
     const classes = useStyles();
 
     return (
@@ -36,7 +39,7 @@ const RequestStatus = () => {
             <Hero />
             <SectionAlternate className={classes.section}>
                 <CardBase withShadow align="left">
-                    <General />
+                    <General requests={requests} />
                 </CardBase>
             </SectionAlternate>
         </div>
@@ -45,17 +48,31 @@ const RequestStatus = () => {
 
 export default RequestStatus;
 
-// export const getServerSideProps = async (ctx) => {
-//     const auth = validateAuth(ctx.req);
+RequestStatus.getLayout = function getLayout(RequestStatus) {
+    return (
+        <Main>{RequestStatus}</Main>
+    )
+}
+export const getServerSideProps = async ({ req, query: { page = 0 }, resolvedUrl }) => {
+    const session = await getSession({ req });
+    if (!session) {
+        return {
+            redirect: {
+                destination: `/signin?redirect=admin/request`,
+                permanent: false
+            }
+        }
+    }
 
-//     //console.log(ctx.req.headers.cookie);
+    const requests = await fetch(`${NEXT_URL}/api/request?page=${page}`, {
+        headers: {
+            cookie: req.headers.cookie,
+        }
+    }).then(result => result.json())
 
-//     if (!auth) {
-//         return {
-//             redirect: {
-//                 permanent: false,
-//                 destination: "/login?redirect=request/status",
-//             },
-//         };
-//     }
-//}
+    return {
+        props: {
+            requests
+        }
+    }
+}

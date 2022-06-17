@@ -3,13 +3,11 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@mui/styles';
 import { useTheme } from '@mui/material/styles'
-
-
 import {
     useMediaQuery,
     Grid,
 } from '@mui/material';
-import RequestStatusList from '@/components/RequestStatusList';
+import RequestList from '@/components/Admin/RequestList';
 
 
 
@@ -36,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 
 
 const General = props => {
-    const { className, requests, ...rest } = props;
+    const { className, requests, error, loading, setPage, setSearch, ...rest } = props;
 
     const classes = useStyles
 
@@ -49,7 +47,7 @@ const General = props => {
     return (
         <div className={clsx(classes.root, className)} {...rest} style={{ width: '100%' }}>
             <Grid container spacing={isMd ? 4 : 2}>
-                <RequestStatusList requests={requests} />
+                <RequestList error={error} loading={loading} requests={requests} setPage={setPage} setSearch={setSearch} />
             </Grid>
         </div>
     );

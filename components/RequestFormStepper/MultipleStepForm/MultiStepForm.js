@@ -21,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MultiStepForm = ({ id }) => {
+const MultiStepForm = ({ initialRequest }) => {
+  const [request, setRequest] = useState(initialRequest);
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
@@ -44,17 +45,17 @@ const MultiStepForm = ({ id }) => {
   function getStepContent(step) {
     switch (step) {
       case 0:
-        return <GeneralForm id={id} handleNext={handleNext} />;
+        return <GeneralForm request={request} setRequest={setRequest} handleNext={handleNext} />;
       case 1:
-        return <WorkForm handleNext={handleNext} handleBack={handleBack} />;
+        return <WorkForm request={request} setRequest={setRequest} handleNext={handleNext} handleBack={handleBack} />;
       case 2:
-        return <PropertyForm handleNext={handleNext} handleBack={handleBack} />;
+        return <PropertyForm request={request} setRequest={setRequest} handleNext={handleNext} handleBack={handleBack} />;
       case 3:
-        return <EducationForm handleNext={handleNext} handleBack={handleBack} />;
+        return <EducationForm request={request} setRequest={setRequest} handleNext={handleNext} handleBack={handleBack} />;
       case 4:
-        return <HealthForm handleNext={handleNext} handleBack={handleBack} />;
+        return <HealthForm request={request} setRequest={setRequest} handleNext={handleNext} handleBack={handleBack} />;
       case 5:
-        return <Success handleBack={handleBack} />;
+        return <Success request={request} setRequest={setRequest} handleBack={handleBack} />;
       default:
         return 'Unknown step';
     }
