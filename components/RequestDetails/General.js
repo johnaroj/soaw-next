@@ -17,6 +17,7 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import { useRouter } from 'next/router'
 import { format } from 'date-fns'
+import Image from 'next/image';
 
 
 const useStyles = makeStyles(theme => ({
@@ -237,8 +238,8 @@ const General = props => {
                                             {
                                                 image.type.includes('application/pdf') ?
                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="580px"></iframe> :
-                                                    <div>
-                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ width: '100%', objectFit: 'cover' }} />
+                                                    <div style={{ height: 500, position: 'relative' }} >
+                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit='cover' />
                                                         <ImageListItemBar
                                                             title={image.name}
                                                             actionIcon={
@@ -343,8 +344,8 @@ const General = props => {
                                             {
                                                 image.type.includes('application/pdf') ?
                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="580px"></iframe> :
-                                                    <div>
-                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ width: '100%', objectFit: 'cover' }} />
+                                                    <div style={{ height: 500, position: 'relative' }}>
+                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit='cover' />
                                                         <ImageListItemBar
                                                             title={image.name}
                                                             actionIcon={
@@ -451,8 +452,8 @@ const General = props => {
                                             {
                                                 image.type.includes('application/pdf') ?
                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                    <div>
-                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                    <div style={{ height: 500, position: 'relative' }} >
+                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                         <ImageListItemBar
                                                             title={image.name}
                                                             actionIcon={
@@ -478,8 +479,8 @@ const General = props => {
                                                 image.type.includes('application/pdf') ?
                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe>
                                                     :
-                                                    <div>
-                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                    <div style={{ height: 500, position: 'relative' }}>
+                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                         <ImageListItemBar
                                                             title={image.name}
                                                             actionIcon={
@@ -583,8 +584,8 @@ const General = props => {
                                                     {
                                                         image.type.includes('application/pdf') ?
                                                             <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                            <div>
-                                                                <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                            <div style={{ height: 500, position: 'relative' }}>
+                                                                <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                 <ImageListItemBar
                                                                     title={image.name}
                                                                     actionIcon={
@@ -617,8 +618,8 @@ const General = props => {
                                                     {
                                                         image.type.includes('application/pdf') ?
                                                             <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                            <div>
-                                                                <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                            <div style={{ height: 500, position: 'relative' }}>
+                                                                <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                 <ImageListItemBar
                                                                     title={image.name}
                                                                     actionIcon={
@@ -746,8 +747,8 @@ const General = props => {
                                                 {
                                                     image.type.includes('application/pdf') ?
                                                         <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                        <div>
-                                                            <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                        <div style={{ height: 500, position: 'relative' }}>
+                                                            <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                             <ImageListItemBar
                                                                 title={image.name}
                                                                 actionIcon={
@@ -987,8 +988,8 @@ const General = props => {
                                                                 {
                                                                     image.type.includes('application/pdf') ?
                                                                         <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                                        <div>
-                                                                            <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                                        <div style={{ height: 500, position: 'relative' }}>
+                                                                            <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                             <ImageListItemBar
                                                                                 title={image.name}
                                                                                 actionIcon={
@@ -1156,8 +1157,8 @@ const General = props => {
                                                             {
                                                                 image.type.includes('application/pdf') ?
                                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                                    <div>
-                                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                                    <div style={{ height: 500, position: 'relative' }}>
+                                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                         <ImageListItemBar
                                                                             title={image.name}
                                                                             actionIcon={
@@ -1244,8 +1245,8 @@ const General = props => {
                                                 {
                                                     image.type.includes('application/pdf') ?
                                                         <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                        <div>
-                                                            <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                        <div style={{ height: 500, position: 'relative' }} >
+                                                            <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                             <ImageListItemBar
                                                                 title={image.name}
                                                                 actionIcon={
@@ -1329,8 +1330,8 @@ const General = props => {
                                                 {
                                                     image.type.includes('application/pdf') ?
                                                         <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                        <div>
-                                                            <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                        <div style={{ height: 500, position: 'relative' }} >
+                                                            <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                             <ImageListItemBar
                                                                 title={image.name}
                                                                 actionIcon={
@@ -1546,8 +1547,8 @@ const General = props => {
                                         {
                                             image.type.includes('application/pdf') ?
                                                 <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                <div>
-                                                    <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                <div style={{ height: 500, position: 'relative' }} >
+                                                    <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                     <ImageListItemBar
                                                         title={image.name}
                                                         actionIcon={
@@ -1581,8 +1582,8 @@ const General = props => {
                                         {
                                             image.type.includes('application/pdf') ?
                                                 <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                <div>
-                                                    <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                <div style={{ height: 500, position: 'relative' }} >
+                                                    <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                     <ImageListItemBar
                                                         title={image.name}
                                                         actionIcon={
@@ -1842,8 +1843,8 @@ const General = props => {
                                                             {
                                                                 image.type.includes('application/pdf') ?
                                                                     <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                                    <div>
-                                                                        <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                                    <div style={{ height: 500, position: 'relative' }} >
+                                                                        <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                         <ImageListItemBar
                                                                             title={image.name}
                                                                             actionIcon={
@@ -1880,8 +1881,8 @@ const General = props => {
 
                                                                         <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe>
                                                                         :
-                                                                        <div>
-                                                                            <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                                        <div style={{ height: 500, position: 'relative' }} >
+                                                                            <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                             <ImageListItemBar
                                                                                 title={image.name}
                                                                                 actionIcon={
@@ -2323,8 +2324,8 @@ const General = props => {
                                         {
                                             image.type.includes('application/pdf') ?
                                                 <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                <div>
-                                                    <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                <div style={{ height: 500, position: 'relative' }} >
+                                                    <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                     <ImageListItemBar
                                                         title={image.name}
                                                         actionIcon={
@@ -2359,8 +2360,8 @@ const General = props => {
                                         {
                                             image.type.includes('application/pdf') ?
                                                 <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                <div>
-                                                    <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                <div style={{ height: 500, position: 'relative' }} >
+                                                    <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                     <ImageListItemBar
                                                         title={image.name}
                                                         actionIcon={
@@ -2395,8 +2396,8 @@ const General = props => {
                                         {
                                             image.type.includes('application/pdf') ?
                                                 <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                <div>
-                                                    <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                <div style={{ height: 500, position: 'relative' }} >
+                                                    <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                     <ImageListItemBar
                                                         title={image.name}
                                                         actionIcon={
@@ -2597,8 +2598,8 @@ const General = props => {
                                                     {
                                                         image.type.includes('application/pdf') ?
                                                             <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                            <div>
-                                                                <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                            <div style={{ height: 500, position: 'relative' }} >
+                                                                <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit="cover" />
                                                                 <ImageListItemBar
                                                                     title={image.name}
                                                                     actionIcon={
@@ -2755,8 +2756,8 @@ const General = props => {
                                                     {
                                                         image.type.includes('application/pdf') ?
                                                             <iframe title={image.name} src={`${image.type},${image.base64}`} width="100%" height="500px"></iframe> :
-                                                            <div>
-                                                                <img src={`${image.type},${image.base64}`} alt={image.name} style={{ height: 500, objectFit: 'contain' }} />
+                                                            <div style={{ height: 500, position: 'relative' }} >
+                                                                <Image src={`${image.type},${image.base64}`} alt={image.name} layout='fill' objectFit='cover' />
                                                                 <ImageListItemBar
                                                                     title={image.name}
                                                                     actionIcon={

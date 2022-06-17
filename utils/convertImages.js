@@ -3,8 +3,6 @@ export function dataUrlToFile(url, name, type) {
         .then(res => res.arrayBuffer())
         .then(buf => {
             return new File([buf], name, { type })
-        }).catch(err => {
-            console.log(err)
         })
 }
 
