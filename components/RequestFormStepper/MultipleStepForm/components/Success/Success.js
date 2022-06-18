@@ -10,12 +10,12 @@ import {
     FormControlLabel,
     Checkbox,
     CircularProgress,
-    useMediaQuery
+    useMediaQuery,
+    Alert
 } from '@mui/material';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useMutation } from "react-query";
-import { Alert } from '@mui/material/Alert';
 import { useStateValue } from 'StateProvider';
 import { useRouter } from 'next/router';
 

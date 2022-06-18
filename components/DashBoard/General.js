@@ -10,9 +10,9 @@ import {
     FormControl,
     InputLabel,
     Select,
-    MenuItem
+    MenuItem,
+    Alert
 } from '@mui/material';
-import { Alert } from '@mui/material/Alert';
 import {
     Chart as ChartJS,
     CategoryScale,
