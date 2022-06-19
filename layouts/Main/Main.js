@@ -82,7 +82,7 @@ const Main = props => {
             title: 'Login',
             id: 'login',
             href: '/signin',
-            onClick: () => signIn('keycloak', { callbackUrl: 'http://localhost:3000' })
+            onClick: () => signIn('keycloak', { callbackUrl: process.env.NEXT_PUBLIC_FRONTEND_URL })
         },
         signout: {
             title: 'Logout',
@@ -102,7 +102,7 @@ const Main = props => {
                 signin: {
                     title: 'Login',
                     href: '/',
-                    onClick: () => signIn('keycloak', { callbackUrl: 'http://localhost:3000' })
+                    onClick: () => signIn('keycloak', { callbackUrl: process.env.NEXT_PUBLIC_FRONTEND_URL })
                 },
                 signout: {
                     title: 'Logout',
