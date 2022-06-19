@@ -32,10 +32,10 @@ jobs:
           output_location: "out" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env: # Add environment variables here
-          NODE_VERSION: 16      
-          PRE_BUILD_COMMAND: "npm install -g prisma"   
-          CUSTOM_BUILD_COMMAND: "npm install @prisma/client && npm run azure-build"               
-          POST_BUILD_COMMAND: "npm install @prisma/client"    
+          NODE_VERSION: 16
+          PRE_BUILD_COMMAND: "npm install -g prisma"
+          CUSTOM_BUILD_COMMAND: "npm install @prisma/client && npm run azure-build"
+          POST_BUILD_COMMAND: "npm install @prisma/client"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
