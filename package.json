@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "node server.js",
+    "start": "next start",
     "lint": "next lint",
     "vercel-build": "npx prisma db push && next build",
     "azure-build": "npx prisma db push && next build",
