@@ -7,6 +7,7 @@ import { Topbar, Footer, Sidebar } from '@/layouts/Main/components';
 import {
     useSession, signIn, signOut
 } from 'next-auth/react'
+import Router from 'next/router';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -25,11 +26,12 @@ const Main = props => {
     });
 
     const [loading, setLoading] = useState(false);
+
     useEffect(() => {
-        router.events.on('routeChangeStart', () => { setLoading(true) });
-        router.events.on('routeChangeComplete', () => { setLoading(false) });
-        router.events.on('routeChangeError', () => { setLoading(false) });
-    }, [router]);
+        Router.events.on('routeChangeStart', () => { setLoading(true) });
+        Router.events.on('routeChangeComplete', () => { setLoading(false) });
+        Router.events.on('routeChangeError', () => { setLoading(false) });
+    }, [Router]);
 
 
     const pages = {
