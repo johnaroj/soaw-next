@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@mui/styles';
-import { useMediaQuery } from '@mui/material';
+import { LinearProgress, useMediaQuery } from '@mui/material';
 import { Topbar, Footer, Sidebar } from '@/layouts/Main/components';
 import {
     useSession, signIn, signOut
@@ -23,6 +23,14 @@ const Main = props => {
     const isMd = useMediaQuery(theme.breakpoints.up('md'), {
         defaultMatches: true,
     });
+
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        router.events.on('routeChangeStart', () => { setLoading(true) });
+        router.events.on('routeChangeComplete', () => { setLoading(false) });
+        router.events.on('routeChangeError', () => { setLoading(false) });
+    }, [router]);
+
 
     const pages = {
         admin: {
@@ -130,6 +138,7 @@ const Main = props => {
                 [classes.root]: true,
             })}
         >
+            {loading && <LinearProgress color='primary' />}
             <Topbar onSidebarOpen={handleSidebarOpen} pages={pages} />
 
             <Sidebar
