@@ -159,7 +159,7 @@ const SidebarNav = props => {
                 <Divider className={classes.divider} />
             </ListItem>
             {
-                authorizedFunction(['SoawAdmin']) ?
+                session.user.role === "admin" ?
                     <>
                         <ListItem className={classes.listItem}>
                             <Typography variant="h6" color="textPrimary" gutterBottom>
@@ -174,7 +174,7 @@ const SidebarNav = props => {
                     : null
             }
             {
-                authorizedFunction(['SoawClient']) ?
+                session.user.role === "admin" ?
                     <>
                         <ListItem className={classes.listItem}>
                             <Typography variant="h6" color="textPrimary" gutterBottom>
