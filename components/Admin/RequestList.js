@@ -1,6 +1,6 @@
 import React from 'react'
 import clsx from 'clsx';
-import { Grid } from '@mui/material'
+import { CircularProgress, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { format } from 'date-fns';
@@ -177,8 +177,7 @@ const RequestList = ({ requests, setPage, error, loading, setSearch }) => {
                 ]
                 }
                 loading={loading}
-                // error={error}
-                components={{ Toolbar: GridToolbar }}
+                components={{ Toolbar: GridToolbar, LoadingOverlay: CircularProgress }}
                 componentsProps={{
                     toolbar: {
                         showQuickFilter: true,

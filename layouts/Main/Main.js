@@ -8,6 +8,7 @@ import {
     useSession, signIn, signOut
 } from 'next-auth/react'
 import Router from 'next/router';
+import Loader from '@/components/atoms/Loader';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -17,22 +18,12 @@ const useStyles = makeStyles(theme => ({
 
 const Main = props => {
     const { children } = props;
-    const { data: session, status } = useSession()
     const classes = useStyles();
 
     const theme = useTheme();
     const isMd = useMediaQuery(theme.breakpoints.up('md'), {
         defaultMatches: true,
     });
-
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        Router.events.on('routeChangeStart', () => { setLoading(true) });
-        Router.events.on('routeChangeComplete', () => { setLoading(false) });
-        Router.events.on('routeChangeError', () => { setLoading(false) });
-    }, [Router]);
-
 
     const pages = {
         admin: {
@@ -140,7 +131,6 @@ const Main = props => {
                 [classes.root]: true,
             })}
         >
-            {loading && <LinearProgress color='primary' />}
             <Topbar onSidebarOpen={handleSidebarOpen} pages={pages} />
 
             <Sidebar
