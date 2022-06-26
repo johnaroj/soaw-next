@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@mui/styles';
+import NextImage from 'next/image';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 
@@ -21,7 +22,7 @@ const useStyles = makeStyles(() => ({
  * @param {Object} props
  */
 const Image = props => {
-  const { src, srcSet, alt, lazy, lazyProps, className, ...rest } = props;
+  const { src, srcSet, alt, lazy, lazyProps, className, height = '100%', width = '100%', layout = 'intrinsic', ...rest } = props;
 
   const classes = useStyles();
   if (lazy) {
@@ -39,11 +40,14 @@ const Image = props => {
   }
 
   return (
-    <img
+    <NextImage
       className={clsx('image', classes.root, className)}
       alt={alt}
       src={src}
+      layout={layout}
       srcSet={srcSet}
+      height={height}
+      width={width}
       {...rest}
     />
   );

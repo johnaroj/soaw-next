@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
   },
   swiper: {
     width: '100%',
-    height: 645,
+    height: 745,
   },
   swiperNavButton: {
     width: `${theme.spacing(3)}px !important`,
@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   },
   image: {
     objectFit: 'cover',
-    height: 645,
+    height: 745,
   }
 }));
 

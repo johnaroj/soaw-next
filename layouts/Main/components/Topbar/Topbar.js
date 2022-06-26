@@ -94,10 +94,6 @@ const useStyles = makeStyles(theme => ({
             objectFit: 'contain',
         },
     },
-    logoImage: {
-        width: '100%',
-        height: '100%',
-    },
     menu: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -268,6 +264,8 @@ const Topbar = props => {
                 <div className={classes.logoContainer}>
                     <a href="/" title="soaw">
                         <Image
+                            height={80}
+                            width={336}
                             className={classes.logoImage}
                             src="/images/logos/iSOAW_web.jpeg"
                             alt="soaw"

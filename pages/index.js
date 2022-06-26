@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
   },
   banner: {
-    height: 645,
+    height: 745,
     width: '100%',
   },
   appBarBottom: {
