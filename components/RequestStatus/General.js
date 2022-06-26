@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
 
 
 const General = props => {
-    const { className, requests, ...rest } = props;
+    const { className, requests, loading, ...rest } = props;
 
     const classes = useStyles
 
@@ -49,7 +49,7 @@ const General = props => {
     return (
         <div className={clsx(classes.root, className)} {...rest} style={{ width: '100%' }}>
             <Grid container spacing={isMd ? 4 : 2}>
-                <RequestStatusList requests={requests} />
+                <RequestStatusList requests={requests} loading={loading} />
             </Grid>
         </div>
     );

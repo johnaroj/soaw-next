@@ -15,7 +15,7 @@ const useStyles = makeStyles({
     }
 });
 
-const RequestStatusList = ({ requests }) => {
+const RequestStatusList = ({ requests, loading }) => {
     const classes = useStyles();
     const router = useRouter()
     return (
@@ -68,7 +68,7 @@ const RequestStatusList = ({ requests }) => {
                 rowsPerPageOptions={[10]}
                 onPageChange={(page) => router.pathname.includes('admin') ? router.push(`/admin/request?page=${page}`) : router.push(`/request/page=${page}`)}
                 rows={requests.items}
-                loading
+                loading={loading}
                 components={{ Toolbar: GridToolbar, LoadingOverlay: LinearProgress }}
 
             />
