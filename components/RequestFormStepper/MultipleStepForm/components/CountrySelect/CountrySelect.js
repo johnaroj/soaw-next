@@ -14,6 +14,8 @@ const CountrySelect = ({ control, name, label, required, error }) => {
                     fullWidth
                     label={label}
                     variant="outlined"
+                    displayEmpty
+                    value={field.value || ''}
                     required={required}
                     error={error}
 

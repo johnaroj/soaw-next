@@ -64,6 +64,7 @@ export const getServerSideProps = async ({ req, query }) => {
             }
         }
     }
+
     let requestListData = null
     if (query.id) {
         requestListData = await fetch(`${NEXT_URL}/api/request/${query.id}`, {
@@ -236,8 +237,8 @@ export const getServerSideProps = async ({ req, query }) => {
     }
 
     if (requestListData || !!requestListData.length) {
-        const original = !!requestListData.length ? requestListData.find(request => request.id === +query.id)
-            : requestListData;
+        const original = query.id ? requestListData.find(request => request.id === +query.id)
+            : requestListData.find(request => request.type === 1);
 
         if (!!query?.reapply) {
             initialRequest = {
@@ -252,7 +253,7 @@ export const getServerSideProps = async ({ req, query }) => {
         else {
             initialRequest = {
                 ...original,
-                edited: true,
+                edited: !!query.id,
                 reapply: !!query.reapply,
                 status: 'MODIFIKA',
                 proofOfResident: await convertImagesToFile(original?.images?.filter(image => image.categoryId === 1)),

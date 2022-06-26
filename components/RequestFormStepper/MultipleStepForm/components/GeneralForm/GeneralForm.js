@@ -76,7 +76,6 @@ const General = props => {
         defaultMatches: true,
     });
 
-
     const schema = yup.object().shape({
         firstName: yup.string().required('Mester yena nòmber'),
         lastName: yup.string().required('Mester yena fam'),
@@ -458,7 +457,7 @@ const General = props => {
                             {errors?.hasDutchNationality && <p style={{ color: '#bf1650' }}>{errors?.hasDutchNationality?.message}</p>}
                         </Grid>
                         {
-                            (watch('hasDutchNationality') !== null ?? request.hasDutchNationality !== null) && !JSON.parse(watch('hasDutchNationality') ?? request.hasDutchNationality) &&
+                            (watch('hasDutchNationality') !== null ?? request.hasDutchNationality !== null) && !JSON.parse(watch('hasDutchNationality') ?? !!request.hasDutchNationality) &&
                             <Grid item xs={6} sm={3}>
                                 <Typography
                                     variant="subtitle1"
@@ -918,7 +917,7 @@ const General = props => {
                             </Grid>) : null
                         }
                         {
-                            ['married', 'registeredPartnership', 'widow', 'divorcedPartnership'].includes(watch("maritalStatus") ?? request.maritalStatus) || JSON.parse(watch('hasRelationship') ?? request.hasRelationship) ?
+                            ['married', 'registeredPartnership', 'widow', 'divorcedPartnership'].includes(watch("maritalStatus") ?? request.maritalStatus) || JSON.parse(watch('hasRelationship') ?? !!request.hasRelationship) ?
                                 <>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1116,7 +1115,7 @@ const General = props => {
                                 </> : null
                         }
                         {
-                            JSON.parse(watch('hasRelationship') ?? request.hasRelationship) &&
+                            JSON.parse(watch('hasRelationship') ?? !!request.hasRelationship) &&
                             (<Grid item xs={12}>
                                 <Typography
                                     variant="subtitle1"
@@ -1140,7 +1139,7 @@ const General = props => {
                             </Grid>)
                         }
                         {
-                            JSON.parse(watch('livingTogether') ?? request.livingTogether) && (
+                            JSON.parse(watch('livingTogether') ?? !!request.livingTogether) && (
                                 <>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
@@ -1211,7 +1210,7 @@ const General = props => {
                             {errors?.hasChildren && <p style={{ color: '#bf1650' }}>{errors?.hasChildren.message}</p>}
                         </Grid>
                         {
-                            JSON.parse(watch('hasChildren') ?? request.hasChildren) ?
+                            JSON.parse(watch('hasChildren') ?? !!request.hasChildren) ?
                                 <>
                                     <Grid item xs={12} sm={6}>
                                         <Typography
