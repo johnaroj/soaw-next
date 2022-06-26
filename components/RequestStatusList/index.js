@@ -1,6 +1,6 @@
 import React from 'react'
-import { DataGrid } from '@mui/x-data-grid';
-import { Grid, IconButton } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { Grid, IconButton, LinearProgress } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
 import { makeStyles } from '@mui/styles';
@@ -68,9 +68,9 @@ const RequestStatusList = ({ requests }) => {
                 rowsPerPageOptions={[10]}
                 onPageChange={(page) => router.pathname.includes('admin') ? router.push(`/admin/request?page=${page}`) : router.push(`/request/page=${page}`)}
                 rows={requests.items}
-            // onRowClick={(params, event, details) => {
-            //     router.pathname.includes('admin') ? router.push(`/admin/request/${params.id}`) : router.push(`/request/${params.id}`)
-            // }}
+                loading
+                components={{ Toolbar: GridToolbar, LoadingOverlay: LinearProgress }}
+
             />
         </Grid>
     )
