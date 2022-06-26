@@ -159,34 +159,32 @@ const SidebarNav = props => {
                 <Divider className={classes.divider} />
             </ListItem>
             {
-                session.user.role === "admin" ?
-                    <>
-                        <ListItem className={classes.listItem}>
-                            <Typography variant="h6" color="textPrimary" gutterBottom>
-                                Admin
-                            </Typography>
-                            <AdminPages />
-                        </ListItem>
-                        <ListItem className={classes.listItem}>
-                            <Divider className={classes.divider} />
-                        </ListItem>
-                    </>
-                    : null
+                session?.user.role === "admin" &&
+                <>
+                    <ListItem className={classes.listItem}>
+                        <Typography variant="h6" color="textPrimary" gutterBottom>
+                            Admin
+                        </Typography>
+                        <AdminPages />
+                    </ListItem>
+                    <ListItem className={classes.listItem}>
+                        <Divider className={classes.divider} />
+                    </ListItem>
+                </>
             }
             {
-                session.user.role === "admin" ?
-                    <>
-                        <ListItem className={classes.listItem}>
-                            <Typography variant="h6" color="textPrimary" gutterBottom>
-                                Petishon
-                            </Typography>
-                            <RequestPages />
-                        </ListItem>
-                        <ListItem className={classes.listItem}>
-                            <Divider className={classes.divider} />
-                        </ListItem>
-                    </>
-                    : null
+                session?.user?.role === "admin" &&
+                <>
+                    <ListItem className={classes.listItem}>
+                        <Typography variant="h6" color="textPrimary" gutterBottom>
+                            Petishon
+                        </Typography>
+                        <RequestPages />
+                    </ListItem>
+                    <ListItem className={classes.listItem}>
+                        <Divider className={classes.divider} />
+                    </ListItem>
+                </>
             }
 
 
