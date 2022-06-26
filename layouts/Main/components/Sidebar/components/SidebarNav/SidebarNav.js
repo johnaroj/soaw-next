@@ -173,7 +173,7 @@ const SidebarNav = props => {
                 </>
             }
             {
-                session?.user?.role === "admin" &&
+                session &&
                 <>
                     <ListItem className={classes.listItem}>
                         <Typography variant="h6" color="textPrimary" gutterBottom>
