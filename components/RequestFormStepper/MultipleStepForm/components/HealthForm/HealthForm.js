@@ -5,7 +5,7 @@ import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import { DropzoneArea } from "react-mui-dropzone";
 import imageCompression from "browser-image-compression";
-import { LocalizationProvider } from "@mui/lab/LocalizationProvider";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import nlLocale from "date-fns/locale/nl";
