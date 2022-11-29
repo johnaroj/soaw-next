@@ -24,7 +24,6 @@ const Minimal = props => {
 
   return (
     <div className={clsx(classes.root, className)}>
-      <Topbar />
       <main className={classes.content}>{children}</main>
     </div>
   );

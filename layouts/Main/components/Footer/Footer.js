@@ -198,16 +198,14 @@ const Footer = props => {
                     <Grid item xs={12} md={2}>
                         <List disablePadding>
                             <ListItem disableGutters className={classes.logoContainerItem}>
-                                <div className={classes.logoContainer}>
-                                    <a href="/" title="thefront">
+                            <Link href="/" title="thefront" className={classes.logoContainer}>
                                         {/* <Image
                                             className={classes.logoImage}
                                             src="/images/logos/logo-negative.svg"
                                             alt="thefront"
                                             lazy={false}
                                         /> */}
-                                    </a>
-                                </div>
+                                    </Link>
                             </ListItem>
                             <ListItem disableGutters>
                                 <IconButton className={classes.socialIcon}>

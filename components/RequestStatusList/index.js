@@ -6,6 +6,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { makeStyles } from '@mui/styles';
 import { useRouter } from 'next/router'
 import { format } from 'date-fns';
+import { useRequest } from '@/context/Provider';
 
 const useStyles = makeStyles({
     root: {
@@ -15,9 +16,11 @@ const useStyles = makeStyles({
     }
 });
 
-const RequestStatusList = ({ requests, loading }) => {
+const RequestStatusList = () => {
     const classes = useStyles();
     const router = useRouter()
+    const { requests } = useRequest();
+
     return (
         <Grid item xs={12}>
             <DataGrid
@@ -68,7 +71,6 @@ const RequestStatusList = ({ requests, loading }) => {
                 rowsPerPageOptions={[10]}
                 onPageChange={(page) => router.pathname.includes('admin') ? router.push(`/admin/request?page=${page}`) : router.push(`/request/page=${page}`)}
                 rows={requests.items}
-                loading={loading}
                 components={{ Toolbar: GridToolbar, LoadingOverlay: LinearProgress }}
 
             />

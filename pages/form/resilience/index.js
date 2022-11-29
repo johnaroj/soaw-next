@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Grid } from '@mui/material';
 import { SectionAlternate, CardBase } from '@/components/organisms';
 import Hero from '@/components/ResilienceForm/Hero';
 import General from '@/components/ResilienceForm/General';
 import Main from '@/layouts/Main';
+import { useRequest } from '@/context/Provider';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -31,14 +32,18 @@ const useStyles = makeStyles(theme => ({
 
 const ResilienceForm = ({ initialRequest }) => {
     const classes = useStyles();
+    const {setRequest} = useRequest();
 
+    useEffect(()=>{
+        setRequest(initialRequest)
+    },[initialRequest])
     return (
         <div className={classes.root}>
             <Hero />
             <SectionAlternate className={classes.section}>
 
                 <CardBase withShadow align="left">
-                    <General request={initialRequest} />
+                    <General />
                 </CardBase>
 
             </SectionAlternate>

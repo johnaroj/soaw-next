@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@mui/styles';
 import { Swiper, SwiperSlide } from 'swiper/react'
-import Image from '@/components/atoms/Image';
+import Image from 'next/image';
 import { Pagination, Navigation, Autoplay, EffectFade } from "swiper";
 import 'swiper/css';
 import "swiper/css/effect-fade";
@@ -27,7 +27,6 @@ const useStyles = makeStyles(theme => ({
   },
   image: {
     objectFit: 'cover',
-    height: 745,
   }
 }));
 
@@ -52,18 +51,12 @@ const Hero = props => {
         modules={[Pagination, Navigation, Autoplay, EffectFade]}
         className={classes.swiper}
       >
-        <SwiperSlide zoom><Image alt="slide-1" src='/images/photos/home/slide-1.jpg' srcSet='/images/photos/home/slide-1.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
-        <SwiperSlide zoom><Image alt="slide-2" src='/images/photos/home/slide-2.jpg' srcSet='/images/photos/home/slide-2.jpg 2x' lazyProps={{ width: '100%', height: '100%' }} className={classes.image}></Image></SwiperSlide>
+        <SwiperSlide zoom style={{position: 'relative'}}><Image alt="slide-1" src='/images/photos/home/slide-1.jpg' srcSet='/images/photos/home/slide-1.jpg 2x' fill sizes="100vw" className={classes.image}></Image></SwiperSlide>
+        <SwiperSlide zoom style={{position: 'relative'}}><Image alt="slide-2" src='/images/photos/home/slide-2.jpg' srcSet='/images/photos/home/slide-2.jpg 2x' fill sizes="100vw" className={classes.image}></Image></SwiperSlide>
       </Swiper>}
     </div>
   );
 };
 
-Hero.propTypes = {
-  /**
-   * External classes
-   */
-  className: PropTypes.string,
-};
 
 export default Hero;

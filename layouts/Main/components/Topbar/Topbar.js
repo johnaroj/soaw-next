@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import Link from '@/components/Link'
 import { makeStyles } from '@mui/styles';
+import Logo from '@/public/images/logos/iSOAW_web.jpeg'
 import {
     AppBar,
     Toolbar,
@@ -17,9 +18,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MenuIcon from '@mui/icons-material/Menu';
-import Image from '@/components/atoms/Image';
+import Image from 'next/image';
 import { useSession } from "next-auth/react"
-    ;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -88,10 +88,11 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.primary.dark,
     },
     logoContainer: {
-        objectFit: 'contain',
+        position: 'relative',
         height: 80,
+        width: 270,
         [theme.breakpoints.up('md')]: {
-            objectFit: 'contain',
+            
         },
     },
     menu: {
@@ -261,18 +262,18 @@ const Topbar = props => {
             className={clsx(classes.root, className)}
         >
             <Toolbar disableGutters className={classes.toolbar}>
-                <div className={classes.logoContainer}>
-                    <a href="/" title="soaw">
-                        <Image
-                            height={80}
-                            width={336}
-                            className={classes.logoImage}
-                            src="/images/logos/iSOAW_web.jpeg"
-                            alt="soaw"
-                            lazy={false}
-                        />
-                    </a>
-                </div>
+                <Link href="/" title="soaw" className={classes.logoContainer}>
+                    <Image
+                        fill 
+                        sizes="100vw"
+                        src={Logo}
+                        alt="soaw"
+                        style={{
+                            objectFit: 'contain',
+                          }}
+                          priority
+                    />
+                </Link>
                 <div className={classes.flexGrow} />
                 <Hidden smDown>
                     <List className={classes.navigationContainer}>

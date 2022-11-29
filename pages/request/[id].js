@@ -7,6 +7,7 @@ import General from '@/components/RequestDetails/General'
 import Main from '@/layouts/Main';
 import { getSession } from 'next-auth/react';
 import { NEXT_URL } from '@/config/index.js';
+import { useRequest } from '@/context/Provider';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -33,13 +34,14 @@ const useStyles = makeStyles(theme => ({
 
 const RequestDetails = ({ request }) => {
     const classes = useStyles();
-
+    const { setRequest } = useRequest();
+    useEffect(() => { setRequest(request) }, [setRequest])
     return (
         <div className={classes.root}>
             <Hero />
             <SectionAlternate className={classes.section}>
                 <CardBase withShadow align="left">
-                    <General request={request} />
+                    <General />
                 </CardBase>
             </SectionAlternate>
         </div>

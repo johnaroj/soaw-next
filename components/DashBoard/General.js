@@ -121,8 +121,6 @@ const General = props => {
     });
 
 
-    console.log(request)
-
     if (error) return (<Grid container spacing={isMd ? 4 : 2}><Grid item xs={12}><Alert severity='error'>{error.message}</Alert></Grid></Grid>)
 
     return (

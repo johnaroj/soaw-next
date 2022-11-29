@@ -6,6 +6,7 @@ import General from '@/components/RequestStatus/General';
 import { getSession } from 'next-auth/react';
 import { NEXT_URL } from '@/config/index.js';
 import Main from '@/layouts/Main';
+import { useRequest } from '@/context/Provider';
 
 
 const useStyles = makeStyles(theme => ({
@@ -32,6 +33,12 @@ const useStyles = makeStyles(theme => ({
 
 
 const RequestStatus = ({ requests }) => {
+    const { setRequests } = useRequest()
+
+    useEffect(() => {
+        setRequests(requests)
+    }, [requests])
+
     const classes = useStyles();
 
     return (
@@ -39,7 +46,7 @@ const RequestStatus = ({ requests }) => {
             <Hero />
             <SectionAlternate className={classes.section}>
                 <CardBase withShadow align="left">
-                    <General requests={requests} />
+                    <General />
                 </CardBase>
             </SectionAlternate>
         </div>

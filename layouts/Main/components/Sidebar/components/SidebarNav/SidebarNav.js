@@ -67,7 +67,7 @@ const CustomLink = forwardRef((props, ref) => (
 const SidebarNav = props => {
     const { pages, onClose, className, ...rest } = props;
     const classes = useStyles();
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
 
     const admin = pages.admin;
     const request = pages.request;
@@ -159,7 +159,7 @@ const SidebarNav = props => {
                 <Divider className={classes.divider} />
             </ListItem>
             {
-                session?.user.role === "admin" &&
+                session?.user.isAdmin &&
                 <>
                     <ListItem className={classes.listItem}>
                         <Typography variant="h6" color="textPrimary" gutterBottom>

@@ -9,7 +9,7 @@ const Loading = ({ loading }) => {
 
             <Image alt="Loading" src="/images/logos/loader.gif" placeholder="blur"
                 blurDataURL="/images/logos/loader-placeholder.svg"
-                height={400} width={400} objectFit="contain" />
+                height={400} width={400} style={{objectFit:"contain"}} />
         </Backdrop>
 
 

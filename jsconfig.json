@@ -20,6 +20,9 @@
             "@/layouts/*": [
                 "layouts/*"
             ],
+            "@/public/*": [
+                "public/*"
+            ],
         }
     }
 }

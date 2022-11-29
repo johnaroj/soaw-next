@@ -4,9 +4,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, LinearProgress } from '@mui/material';
 import theme from '../styles/theme';
 import { SessionProvider } from 'next-auth/react'
-import { StateProvider } from 'StateProvider';
 import { useRouter } from "next/router";
 import Loader from "@/components/atoms/Loader";
+import { Provider } from "@/context/Provider";
 
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
@@ -38,7 +38,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     <>
       {loading && <Loader loading={loading} />}
       <SessionProvider session={session} refetchInterval={5 * 60}>
-        <StateProvider>
+        <Provider>
           <Head>
             <title>Bijstand - SOAW</title>
             <meta name="viewport" content="initial-scale=1, width=device-width" />
@@ -48,7 +48,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
             <CssBaseline />
             {getLayout(<Component {...pageProps} />)}
           </ThemeProvider>
-        </StateProvider>
+        </Provider>
       </SessionProvider>
     </>
 
