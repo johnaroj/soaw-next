@@ -30,7 +30,6 @@ import * as yup from "yup";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import nlLocale from "date-fns/locale/nl";
 import { useSession } from "next-auth/react";
 import nlLocale from "date-fns/locale/nl";
 import { useRouter } from "next/router";
